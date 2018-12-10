@@ -184,6 +184,8 @@ global $wpdb;
 	// Runs once upon extension activation and adds it's version number to the 'extensionversions' column in the 'wpbooklist_jre_user_options' table of the core plugin.
 	register_activation_hook( __FILE__, array( $search_general_functions, 'wpbooklist_search_record_extension_version' ) );
 
+	// Adding the front-end search shortcode.
+	add_shortcode( 'wpbooklist_search', array( $search_general_functions, 'wpbooklist_search_plugin_dynamic_shortcode_function' ) );
 
 
 /* END OF FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
