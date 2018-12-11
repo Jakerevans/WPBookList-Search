@@ -184,7 +184,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_register_table_name() {
 			global $wpdb;
-			//$wpdb->wpbooklist_jre_saved_book_log = "{$wpdb->prefix}wpbooklist_jre_saved_book_log";
+			$wpdb->wpbooklist_search_options = "{$wpdb->prefix}wpbooklist_search_options";
 		}
 
 		/**
@@ -204,27 +204,31 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			global $wpdb;
 			global $charset_collate;
 
-			/*
 			// Call this manually as we may have missed the init hook.
 			$this->wpbooklist_search_register_table_name();
 
-			$sql_create_table1 = "CREATE TABLE {$wpdb->wpbooklist_search}
+			$sql_create_table1 = "CREATE TABLE {$wpdb->wpbooklist_search_options}
 			(
 				ID bigint(190) auto_increment,
-				getstories bigint(255),
-				createpost bigint(255),
-				createpage bigint(255),
-				storypersist bigint(255),
-				deletedefault bigint(255),
-				notifydismiss bigint(255) NOT NULL DEFAULT 1,
-				newnotify bigint(255) NOT NULL DEFAULT 1,
-				notifymessage MEDIUMTEXT,
-				storytimestylepak varchar(255) NOT NULL DEFAULT 'default',
+				perpage bigint(255) NOT NULL DEFAULT 20,
+				hidesearchby varchar(255),
+				defaultsearchby varchar(255),
+				hidesearchin varchar(255),
+				defaultsearchin varchar(255),
+				hidesearchfilter varchar(255),
+				defaultsearchfilter varchar(255),
+				inclusive bigint(255),
 				PRIMARY KEY  (ID),
-				KEY getstories (getstories)
+				KEY perpage (perpage)
 			) $charset_collate; ";
-			dbDelta( $sql_create_table1 );
-			*/
+
+			// If table doesn't exist, create table and add initial data to it.
+			$test_name = $wpdb->prefix . 'wpbooklist_search_options';
+			if ( $test_name !== $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
+				dbDelta( $sql_create_table1 );
+				$table_name = $wpdb->prefix . 'wpbooklist_search_options';
+				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20 ) );
+			}
 		}
 
 		/** Function to allow users to output the search HTML
