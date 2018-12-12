@@ -29,8 +29,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 		public $searchby_flag = false;
 		public $searchby_term;
-		public $filterby_flag = false;
-		public $filterby_term;
 		public $searchterm_flag = false;
 		public $searchterm_term;
 		public $offset_flag = false;
@@ -157,7 +155,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<label>' . $this->trans->trans_257 . '</label>
 						</div>
 						<div class="wpbooklist-margin-right-td">
-							<input type="checkbox" name="hide-library-display-form-checkall"></input>
+							<input id="wpbooklist-search-searchin-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
 						</div>
 					</div>
 					<div class="wpbooklist-display-options-indiv-entry">
@@ -165,7 +163,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<label>' . $this->trans->trans_61 . '</label>
 						</div>
 						<div class="wpbooklist-margin-right-td">
-							<input data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
+							<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
 						</div>
 					</div>';
 
@@ -177,7 +175,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
 						</div>
 						<div class="wpbooklist-margin-right-td">
-							<input data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
+							<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
 						</div>
 					</div>';
 
@@ -232,9 +230,9 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$this->trans->trans_158 => 'format',
 				$this->trans->trans_152 => 'description',
 				$this->trans->trans_146 => 'genres',
-				$this->trans->trans_281 => 'isbn',
-				$this->trans->trans_135 => 'isbn13',
-				$this->trans->trans_136 => 'illustrator',
+				$this->trans->trans_281 => 'illustrator',
+				$this->trans->trans_135 => 'isbn',
+				$this->trans->trans_136 => 'isbn13',
 				$this->trans->trans_149 => 'keywords',
 				$this->trans->trans_154 => 'language',
 				$this->trans->trans_153 => 'notes',
@@ -279,13 +277,16 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<label>' . $this->trans->trans_257 . '</label>
 						</div>
 						<div class="wpbooklist-margin-right-td">
-							<input type="checkbox" name="hide-library-display-form-checkall"></input>
+							<input id="wpbooklist-search-searchby-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
 						</div>
 					</div>';
 
 			// Sort/Alphabetize arrays.
 			sort( $this->checkboxes_array );
 			ksort( $this->db_array );
+
+			error_log(print_r($this->checkboxes_array,true));
+			error_log(print_r($this->db_array,true));
 
 			foreach ( $this->checkboxes_array as $key => $indiv_entry ) {
 
@@ -310,7 +311,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<label>' . ucfirst( $indiv_entry ) . '</label>
 						</div>
 						<div class="wpbooklist-margin-right-td">
-							<input data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox" name="hide-library-display-form-' . $forhtml . '"></input>
+							<input class="wpbooklist-search-searchby-checkbox" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox" name="hide-library-display-form-' . $this->db_array[ $unmodded ] . '"></input>
 						</div>
 					</div>';
 
@@ -325,7 +326,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$this->final_search_html = '
 				<div id="wpbooklist-search-wrapper">
 					<div id="wpbooklist-search-searchterm-input-wrapper">
-						<form>
+						<form id="wpbooklist-search-searchterm-form">
 							<input id="wpbooklist-search-searchterm-input" name="wpbooklist-search-searchterm-input" type="text" />
 							<button id="wpbooklist-search-searchterm-button">' . $this->trans->trans_1 . '</button>
 						</form>
@@ -354,12 +355,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 					if ( isset( $_GET['searchby'] ) ) {
 						$this->searchby_term = filter_var( wp_unslash( $_GET['searchby'] ), FILTER_SANITIZE_STRING );
-					}
-				}
-				if ( false !== stripos( $this->url_param_string, 'filterby' ) ) {
-					$this->filterby_flag = true;
-					if ( isset( $_GET['filterby'] ) ) {
-						$this->filterby_term = filter_var( wp_unslash( $_GET['filterby'] ), FILTER_SANITIZE_STRING );
 					}
 				}
 				if ( false !== stripos( $this->url_param_string, 'searchterm' ) ) {
@@ -392,7 +387,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						$this->filter_values = filter_var( wp_unslash( $_GET['filtervalues'] ), FILTER_SANITIZE_STRING );
 					}
 				}
-
 			}
 
 			// Building an array that will house all of the Libraries we need to search in, whether that's just one Library of multiple.
@@ -435,7 +429,13 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						array_push( $searchby_array, $value );
 					}
 				} else {
-					array_push( $searchby_array, $this->searchby_term );
+					if ( 'searchbyall' === $this->searchby_term ) {
+						foreach ( $this->checkboxes_array as $key => $indiv_entry ) {
+							array_push( $searchby_array, $this->db_array[ $indiv_entry ] );
+						}
+					} else {
+						array_push( $searchby_array, $this->searchby_term );
+					}
 				}
 			}
 
@@ -509,14 +509,10 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									break;
 
 								default:
-									
+
 									break;
 							}
-
-
 						}
-
-
 					}
 
 					foreach ( $filter_term_array as $key => $indiv_filterterm ) {
@@ -524,52 +520,37 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						$this->final_query = $this->final_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
 
 						$this->final_count_query = $this->final_count_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
-
 					}
-
-
-
 				}
 
 				// Now add the total number of search results (before LIMIT & OFFSET) to get a final Total Results across all libraries to build the pagination.
 				$this->total_search_results = $this->total_search_results + $wpdb->get_var( $this->final_count_query );
-
-				// Now we'll take into account the amount of results per page the user has set.
-				if ( null !== $this->search_extension_settings->perpage ) {
-					// Query for getting the actual search results, accounting for pagination, serach term, etc.
-					$this->final_query = $this->final_query . ' LIMIT ' . $this->search_extension_settings->perpage;
-				}
-
-				// Now we'll add in any offset, indicating we're not on the first page of search results.
-				if ( $this->offset_flag && '' !== $this->offset_term ) {
-					// Query for getting the actual search results, accounting for pagination, serach term, etc.
-					$this->final_query = $this->final_query . ' OFFSET ' . $this->offset_term;
-				}
 
 				$search_results = $wpdb->get_results( $this->final_query );
 
 				// Now we're adding in the search results to the final search results array as long as we're under the 'Per Page' limit.
 				foreach ( $search_results as $key => $value ) {
 
+					// Add the Library in for outputting the results.
+					$value->table = $library;
 
-
-					if ( $this->search_extension_settings->perpage > count( $this->actual_search_results ) ) {
-
-						// Add the Library in for outputting the results.
-						$value->table = $library;
-
-						array_push( $this->actual_search_results, $value );
-					}
+					array_push( $this->actual_search_results, $value );
 				}
 			}
 
-			//echo ' Total Search Results:      '.$this->total_search_results;
-			//echo ' Actual Search Results accounting for pagination:    ' . count($this->actual_search_results );
-
-			//echo ' Dumping the Actual Search Results: '; 
-			//var_dump(print_r($this->actual_search_results,true));
-
-
+			if ( 0 < (int) $this->offset_term ) {
+				foreach ( $this->actual_search_results as $key => $result ) {
+					if ( ( $key < (int) $this->offset_term ) || ( $key > ( (int) $this->offset_term + $this->search_extension_settings->perpage - 1 ) ) ) {
+						unset( $this->actual_search_results[ $key ] );
+					}
+				}
+			} else {
+				foreach ( $this->actual_search_results as $key => $result ) {
+					if ( $key > ( $this->search_extension_settings->perpage - 1 ) ) {
+						unset( $this->actual_search_results[ $key ] );
+					}
+				}
+			}
 		}
 
 
@@ -617,9 +598,11 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 										<p class="wpbooklist_saved_title_link wpbooklist-show-book-colorbox" data-bookid="' . $value->ID . '" data-booktable="' . $value->table . '" id="wpbooklist_saved_title_link">' . $value->title . '<span class="hidden_id_title">' . $value->ID . '</span>
 					    				</p>
 									</div>
-
 									<div class="wpbooklist-search-results-listing-author-wrapper">
 										<p>' . $this->trans->trans_592 . ' ' . $author_for_display . '</p>
+									</div>
+									<div class="wpbooklist-search-results-listing-pubdate-wrapper">
+										<p>' . $this->trans->trans_597 . ' ' . $value->pub_year . '</p>
 									</div>
 
 
@@ -649,7 +632,78 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		 * Builds the actual pagination HTML.
 		 */
 		private function build_pagination_actual_html() {
-			$this->pagination_actual_html = '';
+
+			//echo $this->total_search_results;
+			//echo $this->search_extension_settings->perpage;
+
+			$pagination_options_string = '';
+
+			// Setting up variables to determine the previous offset to go back to, or to disable that ability if on Page 1.
+			if ( '0' !== $this->offset_term && null !== $this->offset_term ) {
+				$prevnum          = $this->offset_term - $this->search_extension_settings->perpage;
+				$styledisableleft = '';
+			} else {
+				$prevnum          = 0;
+				$styledisableleft = 'style="pointer-events:none;opacity:0.5;"';
+			}
+
+			// Setting up variables to determine the next offset to go to, or to disable that ability if on last Page.
+			if ( $this->offset_term < ( $this->total_search_results - $this->search_extension_settings->perpage ) ) {
+				$nextnum           = $this->offset_term + $this->search_extension_settings->perpage;
+				$styledisableright = '';
+			} else {
+				$nextnum           = $this->offset_term;
+				$styledisableright = 'style="pointer-events:none;opacity:0.5;"';
+			}
+
+			// Getting total number of full pages and/or if there's only a partial/remainder page.
+			if ( $this->total_search_results > 0 && $this->search_extension_settings->perpage > 0 ) {
+
+				// Getting whole pages. Can be zero if total number of books is less that amount set to be displayed per page in the backend settings.
+				$whole_pages = floor( $this->total_search_results / $this->search_extension_settings->perpage );
+
+				// Determing whether there is a partial page, whose contents contains less books than amount set to be displayed per page in the backend settings. Will only be 0 if total number of books is evenly divisible by $this->search_extension_settings->perpage.
+				$remainder_pages = $this->total_search_results % $this->search_extension_settings->perpage;
+				if ( 0 !== $remainder_pages ) {
+					$remainder_pages = 1;
+				}
+
+				// If there's only one page, don't show pagination.
+				if ( ( 1 === $whole_pages && 0 === $remainder_pages ) || ( 0 === $whole_pages && 1 === $remainder_pages ) ) {
+					return;
+				}
+
+				// The loop that will create the <option> html for the <select> for the whole pages.
+				for ( $i = 1; $i <= $whole_pages + $remainder_pages; $i++ ) {
+
+					$pagination_options_string = $pagination_options_string . '<option value="' . ( ( $i - 1 ) * $this->search_extension_settings->perpage ) . '">' . $this->trans->trans_600 . ' ' . $i . '</option>';
+
+				}
+			}
+
+			// Actual Pagination HTML.
+			if ( '' !== $pagination_options_string ) {
+				$string1 = '
+				<div class="wpbooklist-pagination-div">
+					<div class="wpbooklist-pagination-div-inner">
+						<div class="wpbooklist-pagination-left-div" ' . $styledisableleft . ' data-offset="' . $prevnum . '">
+							<p><img class="wpbooklist-pagination-prev-img" src="' . ROOT_IMG_URL . 'next-left.png" />' . $this->trans->trans_36 . '</p>
+						</div>
+						<div class="wpbooklist-pagination-middle-div">
+							<select class="wpbooklist-pagination-middle-div-select" id="wpbooklist-search-pagination-middle-div-select">
+								' . $pagination_options_string . '
+							</select>
+						</div>
+						<div class="wpbooklist-pagination-right-div" ' . $styledisableright . ' data-offset="' . $nextnum . '" >
+							<p>' . $this->trans->trans_37 . '<img class="wpbooklist-pagination-prev-img" src="' . ROOT_IMG_URL . 'next-right.png" /></p>
+						</div>
+					</div>
+				</div>';
+			} else {
+				$string1 = '';
+			}
+
+			$this->pagination_actual_html = $string1;
 		}
 
 		/**

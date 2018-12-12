@@ -102,6 +102,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_admin_js() {
 
+			global $wpdb;
+
 			wp_register_script( 'wpbooklist_search_adminjs', SEARCH_JS_URL . 'wpbooklist_search_admin.min.js', array( 'jquery' ), WPBOOKLIST_VERSION_NUM, true );
 
 			// Next 4-5 lines are required to allow translations of strings that would otherwise live in the wpbooklist-admin-js.js JavaScript File.
@@ -117,8 +119,9 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			// Adding some other individual values we may need.
 			$final_array_of_php_values['SEARCH_ROOT_IMG_ICONS_URL'] = SEARCH_ROOT_IMG_ICONS_URL;
 			$final_array_of_php_values['SEARCH_ROOT_IMG_URL']       = SEARCH_ROOT_IMG_URL;
-			$final_array_of_php_values['FOR_TAB_HIGHLIGHT']                         = admin_url() . 'admin.php';
-			$final_array_of_php_values['SAVED_ATTACHEMENT_ID']                      = get_option( 'media_selector_attachment_id', 0 );
+			$final_array_of_php_values['SEARCH_SPECIAL_PREFIX']     = $wpdb->prefix;
+			$final_array_of_php_values['FOR_TAB_HIGHLIGHT']         = admin_url() . 'admin.php';
+			$final_array_of_php_values['SAVED_ATTACHEMENT_ID']      = get_option( 'media_selector_attachment_id', 0 );
 
 			// Now registering/localizing our JavaScript file, passing all the PHP variables we'll need in our $final_array_of_php_values array, to be accessed from 'wphealthtracker_php_variables' object (like wphealthtracker_php_variables.nameofkey, like any other JavaScript object).
 			wp_localize_script( 'wpbooklist_search_adminjs', 'wpbooklistSearchPhpVariables', $final_array_of_php_values );
@@ -133,6 +136,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 * Adding the frontend js file
 		 */
 		public function wpbooklist_search_frontend_js() {
+
+			global $wpdb;
 
 			wp_register_script( 'wpbooklist_search_frontendjs', SEARCH_JS_URL . 'wpbooklist_search_frontend.min.js', array( 'jquery' ), SEARCH_VERSION_NUM, true );
 
@@ -149,6 +154,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			// Adding some other individual values we may need.
 			$final_array_of_php_values['SEARCH_ROOT_IMG_ICONS_URL'] = SEARCH_ROOT_IMG_ICONS_URL;
 			$final_array_of_php_values['SEARCH_ROOT_IMG_URL']       = SEARCH_ROOT_IMG_URL;
+			$final_array_of_php_values['SEARCH_SPECIAL_PREFIX']     = $wpdb->prefix;
 
 			// Now registering/localizing our JavaScript file, passing all the PHP variables we'll need in our $final_array_of_php_values array, to be accessed from 'wphealthtracker_php_variables' object (like wphealthtracker_php_variables.nameofkey, like any other JavaScript object).
 			wp_localize_script( 'wpbooklist_search_frontendjs', 'wpbooklistSearchPhpVariables', $final_array_of_php_values );
