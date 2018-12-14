@@ -18,9 +18,120 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 	 */
 	class Search_General_Functions {
 
-		/** Functions that loads up the menu page entry for this Extension.
+		/**
+		 * Verifies the license for the extension is valid - otherwise, the Extension doesn't load.
 		 *
-		 *  @param array $submenu_array - The array that contains submenu entries to add to.
+		 * @param  array $plugins List of plugins to activate & load.
+		 */
+		public function wpbooklist_search_verify_license( $plugins ) {
+
+			global $wpdb;
+
+			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
+			$unnecessary_plugins[] = 'wpbooklist-search/wpbooklist-search.php';
+
+			// If the License Key just hasn't been entered yet...
+			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+
+				foreach ( $unnecessary_plugins as $plugin ) {
+					$k = array_search( $plugin, $plugins );
+					if ( false !== $k ) {
+						unset( $plugins[ $k ] );
+					}
+				}
+
+				return $plugins;
+
+			} else {
+
+				// If a License key has been saved, let's verify it, and if it's not good, don't load the plugin.
+				$license_good_flag = true;
+
+
+				if ( $license_good_flag ) {
+					return $plugins;
+				} else {
+
+					foreach ( $unnecessary_plugins as $plugin ) {
+						$k = array_search( $plugin, $plugins );
+						if ( false !== $k ) {
+							unset( $plugins[ $k ] );
+						}
+					}
+
+					return $plugins;
+
+				}
+			}
+		}
+
+		/**
+		 * Adds in the 'Enter License Key' text input and submit button.
+		 *
+		 * @param  array $links List of existing plugin action links.
+		 * @return array List of modified plugin action links.
+		 */
+		public function wpbooklist_search_pluginspage_license_entry( $links ) {
+
+			global $wpdb;
+
+			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
+			$trans = new WPBookList_Search_Translations();
+
+			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
+			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+				$value = $trans->trans_1;
+			} else {
+				$value = $this->extension_settings->license;
+			}
+
+			$license_html = '
+				<form>
+					<input id="wpbooklist-extension-licence-key-plugins-page-input-search" class="wpbooklist-extension-licence-key-plugins-page-input" type="text" placeholder="' . $trans->trans_1 . '" value="' . $value . '"></input>
+					<button id="wpbooklist-extension-licence-key-plugins-page-button-search" class="wpbooklist-extension-licence-key-plugins-page-button">' . $trans->trans_2 . '</button>
+				</form>';
+
+			array_push( $links, $license_html );
+
+			return $links;
+
+		}
+
+		/**
+		 * Displays the 'Enter Your License Key' message at the top of the dashboard if the user hasn't done so already.
+		 */
+		public function wpbooklist_search_top_dashboard_license_notification() {
+
+			global $wpdb;
+
+			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
+			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+
+				require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
+				$trans = new WPBookList_Search_Translations();
+
+				echo '
+				<div class="notice notice-success is-dismissible">
+					<form class="wpbooklist-extension-licence-key-dashboard-form" id="wpbooklist-extension-licence-key-dashboard-form-search">
+						<p class="wpbooklist-extension-licence-key-dashboard-title">' . $trans->trans_3 . '</p>
+						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-licence-key-dashboard-input" type="text" placeholder="' . $trans->trans_1 . '" value="' . $trans->trans_1 . '"></input>
+						<button id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_4 . '</button>
+					</form>
+				</div>';
+			}
+		}
+
+
+		/**
+		 * Functions that loads up the menu page entry for this Extension.
+		 *
+		 * @param array $submenu_array The array that contains submenu entries to add to.
 		 */
 		public function wpbooklist_search_submenu( $submenu_array ) {
 			$extra_submenu = array(
@@ -223,11 +334,12 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 				defaultsearchin varchar(255),
 				hidesearchfilter varchar(255),
 				defaultsearchfilter varchar(255),
+				license varchar(255),
 				searchmode varchar(255) NOT NULL DEFAULT 'inclusive',
 				PRIMARY KEY  (ID),
 				KEY perpage (perpage)
 			) $charset_collate; ";
-//pages-2,author-2,title-2,
+
 			// If table doesn't exist, create table and add initial data to it.
 			$test_name = $wpdb->prefix . 'wpbooklist_search_options';
 			if ( $test_name !== $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {

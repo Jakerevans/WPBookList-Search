@@ -124,7 +124,7 @@ global $wpdb;
 	// Nonces array.
 	define( 'SEARCH_NONCES_ARRAY',
 		wp_json_encode(array(
-			'adminnonce1' => 'wpbooklist_search_functionname_action_callback',
+			'adminnonce1'  => 'wpbooklist_search_save_license_key_action_callback',
 		))
 	);
 
@@ -150,6 +150,14 @@ global $wpdb;
 
 
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
+
+	add_filter( 'option_active_plugins', array( $search_general_functions, 'wpbooklist_search_verify_license' ) );
+
+	// Displays the 'Enter Your License Key' message at the top of the dashboard if the user hasn't done so already.
+	add_action( 'admin_notices', array( $search_general_functions, 'wpbooklist_search_top_dashboard_license_notification' ) );
+
+	// Function that adds in the License Key Submission form on this Extension's entry on the plugins page.
+	add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $search_general_functions, 'wpbooklist_search_pluginspage_license_entry' ) );
 
 	// Function that loads up the menu page entry for this Extension.
 	add_filter( 'wpbooklist_add_sub_menu', array( $search_general_functions, 'wpbooklist_search_submenu' ) );
@@ -191,6 +199,9 @@ global $wpdb;
 /* END OF FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-AJAX-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
+
+	// Callback function for handling the saving of the user's License Key.
+	add_action( 'wp_ajax_wpbooklist_search_save_license_key_action', array( $search_ajax_functions, 'wpbooklist_search_save_license_key_action_callback' ) );
 
 	// For receiving user feedback upon deactivation & deletion.
 	add_action( 'wp_ajax_search_exit_results_action', array( $search_ajax_functions, 'search_exit_results_action_callback' ) );

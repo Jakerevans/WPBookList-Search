@@ -26,6 +26,31 @@ if ( ! class_exists( 'Search_Ajax_Functions', false ) ) :
 
 		}
 
+		/**
+		 * Callback function for handling the saving of the user's License Key.
+		 */
+		public function wpbooklist_search_save_license_key_action_callback() {
+
+			global $wpdb;
+
+			check_ajax_referer( 'wpbooklist_search_save_license_key_action_callback', 'security' );
+
+			if ( isset( $_POST['license'] ) ) {
+				$license = filter_var( wp_unslash( $_POST['license'] ), FILTER_SANITIZE_STRING );
+			}
+
+			$data         = array(
+				'license' => $license,
+			);
+			$format       = array( '%s' );
+			$where        = array( 'ID' => 1 );
+			$where_format = array( '%d' );
+			$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_options', $data, $where, $format, $where_format );
+
+			wp_die( $save_result );
+
+		}
+
 	}
 endif;
 
