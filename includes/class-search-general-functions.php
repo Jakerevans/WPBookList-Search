@@ -223,17 +223,17 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 				defaultsearchin varchar(255),
 				hidesearchfilter varchar(255),
 				defaultsearchfilter varchar(255),
-				inclusive bigint(255),
+				searchmode varchar(255) NOT NULL DEFAULT 'inclusive',
 				PRIMARY KEY  (ID),
 				KEY perpage (perpage)
 			) $charset_collate; ";
-
+//pages-2,author-2,title-2,
 			// If table doesn't exist, create table and add initial data to it.
 			$test_name = $wpdb->prefix . 'wpbooklist_search_options';
 			if ( $test_name !== $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
 				dbDelta( $sql_create_table1 );
 				$table_name = $wpdb->prefix . 'wpbooklist_search_options';
-				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20 ) );
+				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20, 'searchmode' => 'inclusive', ) );
 			}
 		}
 

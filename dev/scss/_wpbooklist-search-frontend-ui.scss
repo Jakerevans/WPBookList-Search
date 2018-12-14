@@ -114,6 +114,10 @@ q:before,  #wpbooklist-search-wrapper q:after {
     margin-bottom:20px;
 }
 
+#wpbooklist-search-wrapper #wpbooklist-search-results-top-wrapper{
+    margin-top:50px;
+}
+
 #wpbooklist-search-results-top-wrapper .wpbooklist-search-results-listing{
     margin:10px;
     border: 1px solid rgba(1, 1, 1, 0.1);
@@ -179,4 +183,60 @@ q:before,  #wpbooklist-search-wrapper q:after {
 
 #wpbooklist-search-wrapper .wpbooklist-pagination-div{
     text-align:center;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-initial-and-results-wrapper{
+    width:76%;
+    display:inline-block;
+    vertical-align:top;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-rating-title p, #wpbooklist-search-wrapper #wpbooklist-search-refine-rating-title img{
+    display:inline-block;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-rating-title img{
+    width:45px;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper p{
+    margin:0px;
+    font-size:0.8em;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper #wpbooklist-search-refine-search-title-wrapper p{
+    font-size:1em;
+    margin-bottom:20px;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper{
+    max-width:20%;
+    display:inline-block;
+    vertical-align:top;
+}
+
+#wpbooklist-search-refine-search-wrapper .wpbooklist-display-options-label-div label{
+    display:inline-block;
+}
+
+#wpbooklist-search-refine-search-wrapper select{
+    font-size:0.8em;
+    width:75%;
+}
+
+#wpbooklist-search-wrapper .wpbooklist-search-refine-search-row{
+    margin-bottom:20px;
+}
+
+#wpbooklist-search-refine-checkboxes-title p{
+    margin-bottom:10px;
+}
+
+#wpbooklist-search-refinesearch-button{
+    max-width: 70%;
+    font-size: 0.8em;
+}
+
+#wpbooklist-search-wrapper .wpbooklist-search-results-allcheckboxes-wrapper{
+
 }
