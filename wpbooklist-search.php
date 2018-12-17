@@ -58,8 +58,13 @@ global $wpdb;
 
 /* CONSTANT DEFINITIONS */
 
-	// Extension version number.
-	define( 'SEARCH_VERSION_NUM', '6.0.0' );
+	// Root plugin folder directory.
+	if ( ! defined('WPBOOKLIST_VERSION_NUM' ) ) {
+		define( 'WPBOOKLIST_VERSION_NUM', '6.1.2' );
+	}
+
+	// This Extension's Version Number.
+	define( 'WPBOOKLIST_SEARCH_VERSION_NUM', '6.1.2' );
 
 	// Root plugin folder directory.
 	define( 'SEARCH_ROOT_DIR', plugin_dir_path( __FILE__ ) );
@@ -69,7 +74,7 @@ global $wpdb;
 
 	// Root WPBL Dir.
 	if ( ! defined('ROOT_WPBL_DIR' ) ) {
-		define( 'ROOT_WPBL_DIR', SAERCH_ROOT_WP_PLUGINS_DIR . 'wpbooklist/' );
+		define( 'ROOT_WPBL_DIR', SEARCH_ROOT_WP_PLUGINS_DIR . 'wpbooklist/' );
 	}
 
 	// Root WPBL Url.
@@ -97,7 +102,7 @@ global $wpdb;
 		define( 'ROOT_WPBL_IMG_ICONS_URL', ROOT_WPBL_URL . 'assets/img/icons/' );
 	}
 
-	// Root WPBL Root Img Icons Dir.
+	// Root WPBL Root Utilities Dir.
 	if ( ! defined('ROOT_WPBL_UTILITIES_DIR' ) ) {
 		define( 'ROOT_WPBL_UTILITIES_DIR', ROOT_WPBL_CLASSES_DIR . 'utilities/' );
 	}
@@ -177,6 +182,7 @@ global $wpdb;
 
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 
+	// License verification function.
 	add_filter( 'option_active_plugins', array( $search_general_functions, 'wpbooklist_search_verify_license' ) );
 
 	// Displays the 'Enter Your License Key' message at the top of the dashboard if the user hasn't done so already.
@@ -211,6 +217,9 @@ global $wpdb;
 
 	// Function to run any code that is needed to modify the plugin between different versions.
 	add_action( 'admin_footer', array( $search_general_functions, 'wpbooklist_search_admin_pointers_javascript' ) );
+
+	// Verifies that the core WPBookList plugin is installed and activated - otherwise, the Extension doesn't load and a message is displayed to the user.
+	register_activation_hook( __FILE__, array( $search_general_functions, 'wpbooklist_core_plugin_required' ) );
 
 	// Creates tables upon activation.
 	register_activation_hook( __FILE__, array( $search_general_functions, 'wpbooklist_search_create_tables' ) );

@@ -19,6 +19,20 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 	class Search_General_Functions {
 
 		/**
+		 * Verifies that the core WPBookList plugin is installed and activated - otherwise, the Extension doesn't load and a message is displayed to the user.
+		 */
+		public function wpbooklist_core_plugin_required() {
+
+			// Require core WPBookList Plugin.
+			if ( ! is_plugin_active( 'wpbooklist/wpbooklist.php' ) && current_user_can( 'activate_plugins' ) ) {
+
+				// Stop activation redirect and show error.
+				wp_die( 'Whoops! This WPBookList Extension requires the Core WPBookList Plugin to be installed and activated! <br><a target="_blank" href="https://wordpress.org/plugins/wpbooklist/">Download WPBookList Here!</a><br><br><a href="' . admin_url( 'plugins.php' ) . '">&laquo; Return to Plugins</a>');
+			}
+		}
+
+
+		/**
 		 * Verifies the license for the extension is valid - otherwise, the Extension doesn't load.
 		 *
 		 * @param  array $plugins List of plugins to activate & load.
@@ -48,7 +62,6 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 				// If a License key has been saved, let's verify it, and if it's not good, don't load the plugin.
 				$license_good_flag = true;
-
 
 				if ( $license_good_flag ) {
 					return $plugins;
@@ -121,7 +134,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 					<form class="wpbooklist-extension-licence-key-dashboard-form" id="wpbooklist-extension-licence-key-dashboard-form-search">
 						<p class="wpbooklist-extension-licence-key-dashboard-title">' . $trans->trans_3 . '</p>
 						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-licence-key-dashboard-input" type="text" placeholder="' . $trans->trans_1 . '" value="' . $trans->trans_1 . '"></input>
-						<button id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_4 . '</button>
+						<button data-ext="search" id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_4 . '</button>
 					</form>
 				</div>';
 			}
@@ -171,9 +184,9 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 				$split_string = explode( 'search', $existing_string->extensionversions );
 				$first_part   = $split_string[0];
 				$last_part    = substr( $split_string[1], 5 );
-				$new_string   = $first_part . 'search' . SEARCH_VERSION_NUM . $last_part;
+				$new_string   = $first_part . 'search' . WPBOOKLIST_SEARCH_VERSION_NUM . $last_part;
 			} else {
-				$new_string = $existing_string->extensionversions . 'search' . SEARCH_VERSION_NUM;
+				$new_string = $existing_string->extensionversions . 'search' . WPBOOKLIST_SEARCH_VERSION_NUM;
 			}
 
 			$data         = array(
@@ -201,7 +214,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 				$version      = substr( $split_string[1], 0, 5 );
 
 				// If version number does not match the current version number found in wpbooklist.php, call the Compat class and run upgrade functions.
-				if ( SEARCH_VERSION_NUM !== $version ) {
+				if ( WPBOOKLIST_SEARCH_VERSION_NUM !== $version ) {
 					require_once SEARCH_CLASS_COMPAT_DIR . 'class-search-compat-functions.php';
 					$compat_class = new Search_Compat_Functions();
 				}
@@ -250,7 +263,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			global $wpdb;
 
-			wp_register_script( 'wpbooklist_search_frontendjs', SEARCH_JS_URL . 'wpbooklist_search_frontend.min.js', array( 'jquery' ), SEARCH_VERSION_NUM, true );
+			wp_register_script( 'wpbooklist_search_frontendjs', SEARCH_JS_URL . 'wpbooklist_search_frontend.min.js', array( 'jquery' ), WPBOOKLIST_SEARCH_VERSION_NUM, true );
 
 			// Next 4-5 lines are required to allow translations of strings that would otherwise live in the wpbooklist-admin-js.js JavaScript File.
 			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
@@ -281,7 +294,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_admin_style() {
 
-			wp_register_style( 'wpbooklist_search_adminui', SEARCH_CSS_URL . 'wpbooklist-search-main-admin.css', null, SEARCH_VERSION_NUM );
+			wp_register_style( 'wpbooklist_search_adminui', SEARCH_CSS_URL . 'wpbooklist-search-main-admin.css', null, WPBOOKLIST_SEARCH_VERSION_NUM );
 			wp_enqueue_style( 'wpbooklist_search_adminui' );
 
 		}
@@ -291,7 +304,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_frontend_style() {
 
-			wp_register_style( 'wpbooklist_search_frontendui', SEARCH_CSS_URL . 'wpbooklist-search-main-frontend.css', null, SEARCH_VERSION_NUM );
+			wp_register_style( 'wpbooklist_search_frontendui', SEARCH_CSS_URL . 'wpbooklist-search-main-frontend.css', null, WPBOOKLIST_SEARCH_VERSION_NUM );
 			wp_enqueue_style( 'wpbooklist_search_frontendui' );
 
 		}
