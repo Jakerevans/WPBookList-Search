@@ -147,13 +147,38 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 * @param array $submenu_array The array that contains submenu entries to add to.
 		 */
 		public function wpbooklist_search_submenu( $submenu_array ) {
-			$extra_submenu = array(
-				'Search',
-			);
 
-			// Combine the two arrays.
-			$submenu_array = array_merge( $submenu_array, $extra_submenu );
-			return $submenu_array;
+			global $wpdb;
+
+			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
+			// If the License Key just hasn't been entered yet...
+			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+
+				return $submenu_array;
+
+			} else {
+
+				// If a License key has been saved, let's verify it, and if it's not good, don't load the plugin.
+				$license_good_flag = true;
+
+				if ( $license_good_flag ) {
+
+					$extra_submenu = array(
+						'Search',
+					);
+
+					// Combine the two arrays.
+					$submenu_array = array_merge( $submenu_array, $extra_submenu );
+					return $submenu_array;
+
+				} else {
+
+					return $submenu_array;
+
+				}
+			}
 		}
 
 		/**
@@ -400,7 +425,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			$offset = 0;
 			*/
 			ob_start();
-			include_once SEARCH_ROOT_INCLUDES_UI . 'class-wpbooklist-frontend-search-ui.php';
+			include_once SEARCH_CLASS_DIR . 'class-wpbooklist-frontend-search-ui.php';
 			$front_end_library_ui = new WPBookList_Frontend_Search_UI( );
 			return ob_get_clean();
 		}

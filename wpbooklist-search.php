@@ -182,9 +182,6 @@ global $wpdb;
 
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 
-	// License verification function.
-	add_filter( 'option_active_plugins', array( $search_general_functions, 'wpbooklist_search_verify_license' ) );
-
 	// Displays the 'Enter Your License Key' message at the top of the dashboard if the user hasn't done so already.
 	add_action( 'admin_notices', array( $search_general_functions, 'wpbooklist_search_top_dashboard_license_notification' ) );
 

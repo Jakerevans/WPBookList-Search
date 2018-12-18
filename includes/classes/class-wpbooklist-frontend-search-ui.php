@@ -171,9 +171,10 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							</div>
 						</div>';
 
+						$dyn_search_in_boxes = '';
 			foreach ( $this->dynamic_libs_array as $key => $value ) {
 
-				$this->search_in_boxes = $this->search_in_boxes .
+				$dyn_search_in_boxes = $dyn_search_in_boxes .
 					'<div class="wpbooklist-display-options-indiv-entry">
 						<div class="wpbooklist-display-options-label-div">
 							<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
@@ -181,10 +182,11 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						<div class="wpbooklist-margin-right-td">
 							<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
 						</div>
-					</div>
-				</div>';
+					</div>';
 
 			}
+
+			$this->search_in_boxes = $this->search_in_boxes . $dyn_search_in_boxes . '</div>';
 
 		}
 
