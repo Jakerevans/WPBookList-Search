@@ -145,9 +145,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 			global $wpdb;
 
-			// Getting all user-created libraries.
-			$db_row = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_jre_list_dynamic_db_names' );
-
 			$this->search_in_boxes = '
 				<div class="wpbooklist-display-options-indiv-entry-wrapper">
 					<div id="wpbooklist-display-options-indiv-entry-title">
