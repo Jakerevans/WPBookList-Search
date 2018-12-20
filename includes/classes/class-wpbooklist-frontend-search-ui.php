@@ -92,7 +92,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			// Builds the 'Filter Search Results' HTML.
 			$this->build_filter_search_results_html();
 
-			// Builds the actual search results HTML, complete with the retreived books.
+			// Builds the actual search results HTML, complete with the retrieved books.
 			$this->build_search_results_actual_html();
 
 			// Builds the actual pagination HTML.
@@ -158,8 +158,49 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							<div class="wpbooklist-margin-right-td">
 								<input id="wpbooklist-search-searchin-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
 							</div>
-						</div>
-						<div class="wpbooklist-display-options-indiv-entry">
+						</div>';
+
+			// Seeing if we've got some configuration fo the default library goin on.
+			if ( '' !== $this->search_extension_settings->hidesearchin && null !== $this->search_extension_settings->hidesearchin ) {
+
+				if ( false !== stripos( $this->search_extension_settings->hidesearchin, 'defaultwpbllibrary-' ) ) {
+
+					$temp = explode( 'defaultwpbllibrary-', $this->search_extension_settings->hidesearchin );
+
+					// Hide from user, do not keep checked.
+					if ( '0' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$this->search_in_boxes = $this->search_in_boxes;
+					}
+
+					// Hide from user, but keep value checked as a default search option.
+					if ( '1' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$this->search_in_boxes = $this->search_in_boxes .
+							'<div style="display:none!important;" class="wpbooklist-display-options-indiv-entry">
+								<div class="wpbooklist-display-options-label-div">
+									<label>' . $this->trans->trans_61 . '</label>
+								</div>
+								<div class="wpbooklist-margin-right-td">
+									<input checked class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
+								</div>
+							</div>';
+					}
+
+					// Don't hide from user, checked by default.
+					if ( '2' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$this->search_in_boxes = $this->search_in_boxes .
+							'<div class="wpbooklist-display-options-indiv-entry">
+								<div class="wpbooklist-display-options-label-div">
+									<label>' . $this->trans->trans_61 . '</label>
+								</div>
+								<div class="wpbooklist-margin-right-td">
+									<input checked class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
+								</div>
+							</div>';
+					}
+				} else {
+
+					// No settings stuff that applies to the default library - display as normal.
+					$this->search_in_boxes = $this->search_in_boxes . '<div class="wpbooklist-display-options-indiv-entry">
 							<div class="wpbooklist-display-options-label-div">
 								<label>' . $this->trans->trans_61 . '</label>
 							</div>
@@ -167,20 +208,109 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
 							</div>
 						</div>';
+				}
+			} else {
+				// No settings stuff saved by user at all - display as normal.
+				$this->search_in_boxes = $this->search_in_boxes . '<div class="wpbooklist-display-options-indiv-entry">
+							<div class="wpbooklist-display-options-label-div">
+								<label>' . $this->trans->trans_61 . '</label>
+							</div>
+							<div class="wpbooklist-margin-right-td">
+								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
+							</div>
+						</div>';
+			}
 
-						$dyn_search_in_boxes = '';
+			$dyn_search_in_boxes = '';
 			foreach ( $this->dynamic_libs_array as $key => $value ) {
 
-				$dyn_search_in_boxes = $dyn_search_in_boxes .
-					'<div class="wpbooklist-display-options-indiv-entry">
-						<div class="wpbooklist-display-options-label-div">
-							<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
-						</div>
-						<div class="wpbooklist-margin-right-td">
-							<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
-						</div>
-					</div>';
+				/*
+					-0 = Hide from user, do not keep checked.
+					-1 = Hide from user, but keep value checked as a default search option.
+					-2 = Don't hide from user, checked by default.
+				*/
 
+				// If the user has set at least one 'Search By' field to be default, hidden, etc...
+				$temp_array = array();
+				if ( '' !== $this->search_extension_settings->hidesearchin && null !== $this->search_extension_settings->hidesearchin ) {
+
+					// If there are multiple field entries...
+					if ( false !== stripos( $this->search_extension_settings->hidesearchin, ',' ) ) {
+						$temp_array = explode( ',', $this->search_extension_settings->hidesearchin );
+					} else {
+						array_push( $temp_array, $this->search_extension_settings->hidesearchin );
+					}
+
+					// loop through the array we just made to see if this checkbox has been modified...
+					$add_flag = true;
+					foreach ( $temp_array as $key2 => $indiv_checkbox_setting ) {
+						$temp2 = explode( '-', $indiv_checkbox_setting );
+						$modded = str_replace( 'wp_wpbooklist_jre_', '', $value );
+
+						if ( $temp2[0] === $modded ) {
+							if ( '0' === $temp2[1] ) {
+
+								// Just don't add it into the dom at all.
+								$dyn_search_in_boxes = $dyn_search_in_boxes;
+								$add_flag            = false;
+							}
+
+							// Hide from user, but keep checked as a default search value.
+							if ( '1' === $temp2[1] ) {
+								$dyn_search_in_boxes = $dyn_search_in_boxes .
+									'<div style="display:none!important;" class="wpbooklist-display-options-indiv-entry">
+										<div class="wpbooklist-display-options-label-div">
+											<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
+										</div>
+										<div class="wpbooklist-margin-right-td">
+											<input checked class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
+										</div>
+									</div>';
+
+								$add_flag = false;
+							}
+
+							// Don't hide from user, but keep checked as a default search value.
+							if ( '2' === $temp2[1] ) {
+								$dyn_search_in_boxes = $dyn_search_in_boxes .
+									'<div class="wpbooklist-display-options-indiv-entry">
+										<div class="wpbooklist-display-options-label-div">
+											<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
+										</div>
+										<div class="wpbooklist-margin-right-td">
+											<input checked class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
+										</div>
+									</div>';
+
+								$add_flag = false;
+							}
+						}
+					}
+
+					// If we didn't find an associated value in the saved user settings, add this one into the dom like normal.
+					if ( $add_flag ) {
+						$dyn_search_in_boxes = $dyn_search_in_boxes .
+							'<div class="wpbooklist-display-options-indiv-entry">
+								<div class="wpbooklist-display-options-label-div">
+									<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
+								</div>
+								<div class="wpbooklist-margin-right-td">
+									<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
+								</div>
+							</div>';
+					}
+				} else {
+					// No settings stuff saved by user at all - display as normal.
+					$dyn_search_in_boxes = $dyn_search_in_boxes .
+						'<div class="wpbooklist-display-options-indiv-entry">
+							<div class="wpbooklist-display-options-label-div">
+								<label>' . ucfirst( $this->dynamic_libs_for_display_array[ $key ] ) . '</label>
+							</div>
+							<div class="wpbooklist-margin-right-td">
+								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
+							</div>
+						</div>';
+				}
 			}
 
 			$this->search_in_boxes = $this->search_in_boxes . $dyn_search_in_boxes . '</div>';
@@ -742,7 +872,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$this->total_search_results = $this->total_search_results + $wpdb->get_var( $this->final_count_query );
 
 				$search_results = $wpdb->get_results( $this->final_query );
-
 				// Now we're adding in the search results to the final search results array as long as we're under the 'Per Page' limit.
 				foreach ( $search_results as $key => $value ) {
 
