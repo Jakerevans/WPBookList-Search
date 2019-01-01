@@ -156,6 +156,8 @@ global $wpdb;
 	define( 'SEARCH_NONCES_ARRAY',
 		wp_json_encode(array(
 			'adminnonce1'  => 'wpbooklist_search_save_license_key_action_callback',
+			'adminnonce2'  => 'wpbooklist_search_save_search_field_settings_action_callback',
+			'adminnonce3'  => 'wpbooklist_search_save_search_general_settings_action_callback',
 		))
 	);
 
@@ -237,6 +239,16 @@ global $wpdb;
 
 	// For receiving user feedback upon deactivation & deletion.
 	add_action( 'wp_ajax_search_exit_results_action', array( $search_ajax_functions, 'search_exit_results_action_callback' ) );
+
+	// For saving the 'Search Field' Settings.
+	add_action( 'wp_ajax_wpbooklist_search_save_search_field_settings_action', array( $search_ajax_functions, 'wpbooklist_search_save_search_field_settings_action_callback' ) );
+
+	// For saving the 'Search General Settings' Settings.
+	add_action( 'wp_ajax_wpbooklist_search_save_search_general_settings_action', array( $search_ajax_functions, 'wpbooklist_search_save_search_general_settings_action_callback' ) );
+
+
+
+
 
 /* END OF FUNCTIONS FOUND IN CLASS-WPBOOKLIST-AJAX-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 

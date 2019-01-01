@@ -23,7 +23,7 @@ if ( ! class_exists( 'WPBookList_Search', false ) ) :
 		 */
 		public function __construct() {
 			require_once CLASS_DIR . 'class-admin-ui-template.php';
-			require_once SEARCH_CLASS_DIR . 'class-search-form.php';
+			require_once SEARCH_CLASS_DIR . 'class-wpbooklist-search-form.php';
 
 			// Get Translations.
 			require_once ROOT_WPBL_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';

@@ -37,12 +37,42 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 
 			global $wpdb;
 
+			// Get the saved search options to populate the checkboxes.
+			$hidesearchin = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
+			// Determining if the default library needs to be checked in any way.
+			$saved_checked_1 = '';
+			$saved_checked_2 = '';
+			$saved_checked_3 = '';
+			if ( false !== stripos( $hidesearchin->hidesearchin, 'defaultwpbllibrary-' ) ) {
+
+				$temp = explode( 'defaultwpbllibrary-' , $hidesearchin->hidesearchin );
+
+				if ( '2' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+					$saved_checked_1 = 'checked';
+				}
+
+				if ( '1' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+					$saved_checked_2 = 'checked';
+				}
+
+				if ( '0' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+					$saved_checked_3 = 'checked';
+				}
+			}
+
 			$string1 = '
 				<p class="wpbooklist-tab-intro-para">' . $this->trans->trans_639 . '</p>
+				<div id="wpbooklist-search-checkall-wrapper">
+					<button id="wpbooklist-search-checkall-default">' . $this->trans->trans_647 . '</button>
+					<button id="wpbooklist-search-checkall-defaulthide">' . $this->trans->trans_648 . '</button>
+					<button id="wpbooklist-search-checkall-remove">' . $this->trans->trans_649 . '</button>
+					<button id="wpbooklist-search-checkall-uncheckall">' . $this->trans->trans_258 . '</button>
+				</div>
 				<p style="margin-top:40px; text-align:center; max-width:600px; font-weight:bold; font-size:15px; margin-left:auto; margin-right:auto;">' . $this->trans->trans_640 . '</p>';
 
 			$searchin_string = '<div>';
-			$db_string       = '<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-search-indiv-class" id="wpbooklist-searchin-indiv-div-id-0">
+			$db_string       = '<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-searchin-indiv-class">
 						<div class="wpbooklist-search-libname-wrapper">
 							<div class="wpbooklist-search-libname-div">
 								<img class="wpbooklist-search-searchin-img" src="' . SEARCH_ROOT_IMG_URL .  'library.svg">
@@ -55,7 +85,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_641 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-1" data-dblibname="wp_wpbooklist_jre_saved_book_log" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
+									<input ' . $saved_checked_1 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-1" data-dblibname="defaultwpbllibrary" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
@@ -63,7 +93,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_642 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-2" data-dblibname="wp_wpbooklist_jre_saved_book_log" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
+									<input ' . $saved_checked_2 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-2" data-dblibname="defaultwpbllibrary" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
@@ -71,7 +101,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_643 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-3" data-dblibname="wp_wpbooklist_jre_saved_book_log" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
+									<input ' . $saved_checked_3 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-3" data-dblibname="defaultwpbllibrary" type="checkbox" name="wp_wpbooklist_jre_saved_book_log">
 								</div>
 							</div>
 
@@ -81,8 +111,30 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			// Getting all user-created libraries.
 			$db_row = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_jre_list_dynamic_db_names' );
 			foreach ( $db_row as $key => $table ) {
+
+				// Seeing if the checkbox should be checked based on saved settings...
+				$saved_checked_1 = '';
+				$saved_checked_2 = '';
+				$saved_checked_3 = '';
+				if ( false !== stripos( $hidesearchin->hidesearchin, $table->user_table_name . '-' )  ) {
+
+					$temp = explode( $table->user_table_name . '-', $hidesearchin->hidesearchin );
+
+					if ( '2' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_1 = 'checked';
+					}
+
+					if ( '1' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_2 = 'checked';
+					}
+
+					if ( '0' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_3 = 'checked';
+					}
+				}
+
 				$db_string = $db_string . '
-					<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-search-indiv-class" id="wpbooklist-searchin-indiv-div-id-' . $key . '">
+					<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-searchin-indiv-class">
 						<div class="wpbooklist-search-libname-wrapper">
 							<div class="wpbooklist-search-libname-div">
 								<img class="wpbooklist-search-searchin-img" src="' . SEARCH_ROOT_IMG_URL .  'library.svg">
@@ -95,7 +147,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_641 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-1" data-dblibname="wp_wpbooklist_jre_' . $table->user_table_name . '" type="checkbox" name="wp_wpbooklist_jre_' . $table->user_table_name . '">
+									<input ' . $saved_checked_1 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-1" data-dblibname="' . $table->user_table_name . '" type="checkbox">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
@@ -103,7 +155,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_642 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-2" data-dblibname="wp_wpbooklist_jre_' . $table->user_table_name . '" type="checkbox" name="wp_wpbooklist_jre_' . $table->user_table_name . '">
+									<input ' . $saved_checked_2 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-2" data-dblibname="' . $table->user_table_name . '" type="checkbox">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
@@ -111,7 +163,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_643 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-3" data-dblibname="wp_wpbooklist_jre_' . $table->user_table_name . '" type="checkbox" name="wp_wpbooklist_jre_' . $table->user_table_name . '">
+									<input ' . $saved_checked_3 . ' class="wpbooklist-search-searchin-checkbox wpbooklist-search-searchin-checkbox-3" data-dblibname="' . $table->user_table_name . '" type="checkbox">
 								</div>
 							</div>
 
@@ -208,6 +260,9 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			sort( $this->checkboxes_array );
 			ksort( $this->db_array );
 
+			// Get the saved search options to populate the checkboxes.
+			$hidesearchby = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+
 			$fields_string = '';
 			foreach ( $this->checkboxes_array as $key => $indiv_entry ) {
 
@@ -223,14 +278,35 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 				$forhtml  = str_replace( ')', '', $forhtml );
 				$forhtml  = str_replace( ':', '', $forhtml );
 
+				// Seeing if the checkbox should be checked based on saved settings...
+				$saved_checked_1 = '';
+				$saved_checked_2 = '';
+				$saved_checked_3 = '';
+				if ( false !== stripos( $hidesearchby->hidesearchby, $this->db_array[ $unmodded ] . '-' )  ) {
+
+					$temp = explode( $this->db_array[ $unmodded ] . '-', $hidesearchby->hidesearchby );
+
+					if ( '2' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_1 = 'checked';
+					}
+
+					if ( '1' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_2 = 'checked';
+					}
+
+					if ( '0' === mb_substr( $temp[1], 0, 1, 'utf-8' ) ) {
+						$saved_checked_3 = 'checked';
+					}
+				}
+
 				// Modify text for use as a human-readable label.
 				$indiv_entry = str_replace( '_', ' ', $indiv_entry );
 
 				$fields_string = $fields_string . '
-					<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-search-indiv-class" id="wpbooklist-searchin-indiv-div-id-' . $key . '">
+					<div class="wpbooklist-edit-book-indiv-div-class wpbooklist-searchby-indiv-class">
 						<div class="wpbooklist-search-libname-wrapper">
 							<div class="wpbooklist-search-libname-div">
-								<img class="wpbooklist-search-searchin-img" src="' . SEARCH_ROOT_IMG_URL .  'optimization.svg">
+								<img class="wpbooklist-search-searchin-img" src="' . SEARCH_ROOT_IMG_URL . 'optimization.svg">
 								<p class="wpbooklist-search-searchin-title">' . ucfirst( $indiv_entry ) . '</p>
 							</div>
 						</div>
@@ -240,7 +316,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_641 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-1" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
+									<input ' . $saved_checked_1 . ' class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-1" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
@@ -248,15 +324,15 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 									<label>' . $this->trans->trans_642 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-2" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
+									<input ' . $saved_checked_2 . ' class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-2" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
 								</div>
 							</div>
 							<div class="wpbooklist-search-display-options-indiv-entry">
 								<div class="wpbooklist-search-display-options-label-div">
-									<label>' . $this->trans->trans_643 . '</label>
+									<label>' . $this->trans->trans_646 . '</label>
 								</div>
 								<div class="wpbooklist-search-checkbox-actual-wrapper">
-									<input class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-3" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
+									<input ' . $saved_checked_3 . ' class="wpbooklist-search-searchby-checkbox wpbooklist-search-searchby-checkbox-3" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox">
 								</div>
 							</div>
 
@@ -266,9 +342,8 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			}
 
 			$save_string = '<div id="wpbooklist-search-save-wrapper">
-								<button>' . $this->trans->trans_645 . '</button>
+								<button id="wpbooklist-search-save-button">' . $this->trans->trans_645 . '</button>
 								<div class="wpbooklist-spinner" id="wpbooklist-spinner-1"></div>
-								<div id="wpbooklist-search-save-response-div"></div>
 							</div>';
 
 
