@@ -145,20 +145,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 			global $wpdb;
 
-			$this->search_in_boxes = '
-				<div class="wpbooklist-display-options-indiv-entry-wrapper">
-					<div id="wpbooklist-display-options-indiv-entry-title">
-						' . $this->trans->trans_590 . '...
-					</div>
-					<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-in-wrapper">
-						<div class="wpbooklist-display-options-indiv-entry wpbooklist-display-options-indiv-entry-checkall">
-							<div class="wpbooklist-display-options-label-div">
-								<label>' . $this->trans->trans_257 . '</label>
-							</div>
-							<div class="wpbooklist-margin-right-td">
-								<input id="wpbooklist-search-searchin-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
-							</div>
-						</div>';
+			$this->search_in_boxes = '';
+			$show_something = false;
 
 			// Seeing if we've got some configuration fo the default library goin on.
 			if ( '' !== $this->search_extension_settings->hidesearchin && null !== $this->search_extension_settings->hidesearchin ) {
@@ -196,6 +184,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									<input checked class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
 								</div>
 							</div>';
+
+						$show_something = true;
 					}
 				} else {
 
@@ -208,6 +198,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
 							</div>
 						</div>';
+
+					$show_something = true;
 				}
 			} else {
 				// No settings stuff saved by user at all - display as normal.
@@ -219,9 +211,13 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log" type="checkbox" name="' . $wpdb->prefix . 'wpbooklist_jre_saved_book_log"></input>
 							</div>
 						</div>';
+
+				$show_something = true;
 			}
 
+
 			$dyn_search_in_boxes = '';
+			$show_something_array = array();
 			foreach ( $this->dynamic_libs_array as $key => $value ) {
 
 				/*
@@ -283,6 +279,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									</div>';
 
 								$add_flag = false;
+								array_push( $show_something_array, 'show' );
 							}
 						}
 					}
@@ -298,6 +295,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
 								</div>
 							</div>';
+
+						array_push( $show_something_array, 'show' );
 					}
 				} else {
 					// No settings stuff saved by user at all - display as normal.
@@ -310,7 +309,30 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 								<input class="wpbooklist-search-searchin-checkbox" data-dblibname="' . $wpdb->prefix . 'wpbooklist_jre_' . $this->dynamic_libs_for_display_array[ $key ] . '" type="checkbox" name="' . $value . '"></input>
 							</div>
 						</div>';
+
+					array_push( $show_something_array, 'show' );
 				}
+			}
+
+			if ( $show_something || false !== array_search( 'show', $show_something_array ) ) {
+				$this->search_in_boxes = '
+					<div class="wpbooklist-display-options-indiv-entry-wrapper">
+						<div id="wpbooklist-display-options-indiv-entry-title">
+							' . $this->trans->trans_590 . '...
+						</div>
+						<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-in-wrapper">
+							<div class="wpbooklist-display-options-indiv-entry wpbooklist-display-options-indiv-entry-checkall">
+								<div class="wpbooklist-display-options-label-div">
+									<label>' . $this->trans->trans_257 . '</label>
+								</div>
+								<div class="wpbooklist-margin-right-td">
+									<input id="wpbooklist-search-searchin-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
+								</div>
+							</div>' . $this->search_in_boxes;
+			} else {
+				$this->search_in_boxes = '
+					<div class="wpbooklist-display-options-indiv-entry-wrapper">
+						<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-in-wrapper">';
 			}
 
 			$this->search_in_boxes = $this->search_in_boxes . $dyn_search_in_boxes . '</div>';
@@ -345,7 +367,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$this->trans->trans_145,
 				$this->trans->trans_139,
 				$this->trans->trans_142,
-				$this->trans->trans_143,
 				$this->trans->trans_141,
 				$this->trans->trans_156,
 				$this->trans->trans_151,
@@ -373,7 +394,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$this->trans->trans_145 => 'originalpubyear',
 				$this->trans->trans_139 => 'originaltitle',
 				$this->trans->trans_142 => 'pages',
-				$this->trans->trans_143 => 'pub_year',
 				$this->trans->trans_141 => 'publisher',
 				$this->trans->trans_156 => 'series',
 				$this->trans->trans_151 => 'shortdescription',
@@ -401,25 +421,14 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				}
 			}
 
-			$this->search_by_boxes = '
-				<div class="wpbooklist-display-options-indiv-entry-wrapper">
-					<div id="wpbooklist-display-options-indiv-entry-title">
-						' . $this->trans->trans_12 . '...
-					</div>
-					<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-by-wrapper">
-						<div class="wpbooklist-display-options-indiv-entry wpbooklist-display-options-indiv-entry-checkall">
-							<div class="wpbooklist-display-options-label-div">
-								<label>' . $this->trans->trans_257 . '</label>
-							</div>
-							<div class="wpbooklist-margin-right-td">
-								<input id="wpbooklist-search-searchby-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
-							</div>
-						</div>';
+			$this->search_by_boxes = '';
 
 			// Sort/Alphabetize arrays.
 			sort( $this->checkboxes_array );
 			ksort( $this->db_array );
 
+
+			$show_something_array = array();
 			foreach ( $this->checkboxes_array as $key => $indiv_entry ) {
 
 				// Modify text for use in name attribute.
@@ -493,7 +502,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 											<input checked class="wpbooklist-search-searchby-checkbox" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox" name="hide-library-display-form-' . $this->db_array[ $unmodded ] . '"></input>
 										</div>
 									</div>';
-
+								array_push( $show_something_array, 'show' );
 								$add_flag = false;
 							}
 						}
@@ -510,6 +519,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									<input class="wpbooklist-search-searchby-checkbox" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox" name="hide-library-display-form-' . $this->db_array[ $unmodded ] . '"></input>
 								</div>
 							</div>';
+						array_push( $show_something_array, 'show' );
 					}
 				} else {
 
@@ -523,7 +533,33 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 								<input class="wpbooklist-search-searchby-checkbox" data-dbfieldname="' . $this->db_array[ $unmodded ] . '" type="checkbox" name="hide-library-display-form-' . $this->db_array[ $unmodded ] . '"></input>
 							</div>
 						</div>';
+					array_push( $show_something_array, 'show' );
 				}
+			}
+
+			if ( false !== array_search( 'show', $show_something_array ) ) {
+
+				$this->search_by_boxes = '
+				<div class="wpbooklist-display-options-indiv-entry-wrapper">
+					<div id="wpbooklist-display-options-indiv-entry-title">
+						' . $this->trans->trans_12 . '...
+					</div>
+					<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-by-wrapper">
+						<div class="wpbooklist-display-options-indiv-entry wpbooklist-display-options-indiv-entry-checkall">
+							<div class="wpbooklist-display-options-label-div">
+								<label>' . $this->trans->trans_257 . '</label>
+							</div>
+							<div class="wpbooklist-margin-right-td">
+								<input id="wpbooklist-search-searchby-checkbox-checkall" type="checkbox" name="hide-library-display-form-checkall"></input>
+							</div>
+						</div>'  . $this->search_by_boxes;
+
+			} else {
+
+				$this->search_by_boxes = '
+					<div class="wpbooklist-display-options-indiv-entry-wrapper">
+						<div class="wpbooklist-search-results-allcheckboxes-wrapper" id="wpbooklist-search-results-allcheckboxes-in-wrapper">';
+
 			}
 
 			$this->search_by_boxes = $this->search_by_boxes . '</div>';
@@ -553,8 +589,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		 */
 		private function build_refine_search_html() {
 
-			// If there isn't a search in play... otherwise...
-			if ( ! $this->searchby_flag ) {
+			// If there isn't a search in play, and/or the search returned zero results... otherwise...
+			if ( ! $this->searchby_flag || ( 0 === $this->total_search_results ) ) {
 				$this->refine_search_html = '
 					<div id="wpbooklist-search-refine-search-wrapper"></div>';
 			} else {
@@ -602,12 +638,98 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 					}
 				}
 
+				// Build a drop-down of publication years
+				$pub_year_options = array();
+				for ($i=0; $i < 100; $i++) {
+					$temp_num = $i;
+					if ( $i < 10 ) {
+						$temp_num = '0' . $i;
+					}
+					array_push( $pub_year_options, '<option>19' . $temp_num . '</option>' );
+				}
+
+				$limit = date("Y");
+				$limit = str_replace( '20', '', $limit );
+				$limit = ( (int) $limit ) + 1;
+				for ($i=0; $i < $limit; $i++) {
+					$temp_num = $i;
+					if ( $i < 10 ) {
+						$temp_num = '0' . $i;
+					}
+					array_push( $pub_year_options, '<option>20' . $temp_num . '</option>' );
+				}
+				$pub_year_options = array_reverse( $pub_year_options );
+
+				$pub_year_options_string = '';
+				foreach ($pub_year_options as $key => $option) {
+					$pub_year_options_string = $pub_year_options_string . $option;
+				}
+
+				// Building all Genres and sub-genres.
+				$genre_options_string = null;
+				$genre_options_array = array();
+				$subgenre_options_string = null;
+				$subgenre_options_array = array();
+				foreach ( $this->actual_search_results as $key => $value ) {
+
+					if ( '' !== $value->genres && null !== $value->genres ) {
+
+						$value->genres = ltrim( $value->genres, '---' );
+						$value->genres = rtrim( $value->genres, '---' );
+
+						if ( false !== stripos( $value->genres, '---' ) ) {
+
+							$temp = explode( '---', $value->genres );
+
+							foreach ( $temp as $key2 => $value2 ) {
+								array_push( $genre_options_array, $value2 );
+							}
+
+						} else {
+							array_push( $genre_options_array, $value->genres );
+						}
+					}
+
+					if ( '' !== $value->subgenre && null !== $value->subgenre ) {
+
+						$value->subgenre = ltrim( $value->subgenre, '---' );
+						$value->subgenre = rtrim( $value->subgenre, '---' );
+
+						if ( false !== stripos( $value->subgenre, '---' ) ) {
+
+							$temp = explode( '---', $value->subgenre );
+
+							foreach ( $temp as $key2 => $value2 ) {
+								array_push( $subgenre_options_array, $value2 );
+							}
+
+						} else {
+							array_push( $subgenre_options_array, $value->subgenre );
+						}
+					}
+				}
+
+				$genre_options_array = array_unique( $genre_options_array );
+				asort( $genre_options_array );
+				foreach ( $genre_options_array as $key3 => $value3 ) {
+					$genre_options_string = $genre_options_string . '<option>' . $value3 . '</option>';
+				}
+
+				$subgenre_options_array = array_unique( $subgenre_options_array );
+				asort( $subgenre_options_array );
+				foreach ( $subgenre_options_array as $key3 => $value3 ) {
+					$subgenre_options_string = $subgenre_options_string . '<option>' . $value3 . '</option>';
+				}
+
+
+
 				// If there is a search in play, build out the 'Refine Search' control panel.
 				$this->refine_search_html = '
 						<div id="wpbooklist-search-refine-search-wrapper">
 							<form id="wpbooklist-search-searchterm-refined-form">
 								<div class="wpbooklist-search-refine-search-row" id="wpbooklist-search-refine-search-title-wrapper">
-									<p>' . $this->trans->trans_606 . '...</p>
+									<p id="wpbooklist-search-reset-refinements-top-title">' . $this->trans->trans_606 . '...</p>
+									<p id="wpbooklist-search-reset-refinements">' . $this->trans->trans_676 . '</p>
 								</div>
 								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-rating-wrapper">
 									<div id="wpbooklist-search-refine-rating-title">
@@ -629,11 +751,80 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 										</select>
 									</div>
 								</div>
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-format-wrapper">
+									<div id="wpbooklist-search-refine-format-title">
+										<p>' . $this->trans->trans_158 . '</p>
+									</div>
+									<div id="wpbooklist-search-refine-format-dropdown">
+										<select id="wpbooklist-search-refineby-format">
+											<option selected disabled default>' . $this->trans->trans_658 . '</option>
+											<option>' . $this->trans->trans_665 . '</option>
+											<option>' . $this->trans->trans_666 . '</option>
+											<option>' . $this->trans->trans_667 . '</option>
+											<option>' . $this->trans->trans_668 . '</option>
+											<option>' . $this->trans->trans_669 . '</option>
+											<option>' . $this->trans->trans_670 . '</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-genre-wrapper">
+									<div id="wpbooklist-search-refine-genre-title">
+										<p>' . $this->trans->trans_672 . '</p>
+									</div>
+									<div id="wpbooklist-search-refine-genre-dropdown">
+										<select id="wpbooklist-search-refineby-genre">
+											<option selected disabled default>' . $this->trans->trans_673 . '</option>
+											' . $genre_options_string . '
+										</select>
+									</div>
+								</div>
+
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-subgenre-wrapper">
+									<div id="wpbooklist-search-refine-subgenre-title">
+										<p>' . $this->trans->trans_674 . '</p>
+									</div>
+									<div id="wpbooklist-search-refine-subgenre-dropdown">
+										<select id="wpbooklist-search-refineby-subgenre">
+											<option selected disabled default>' . $this->trans->trans_675 . '</option>
+											' . $subgenre_options_string . '
+										</select>
+									</div>
+								</div>
+
+
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-language-wrapper">
+									<div id="wpbooklist-search-refine-language-title">
+										<p>' . $this->trans->trans_154 . '</p>
+									</div>
+									<div id="wpbooklist-search-refine-language-dropdown">
+										<input type="text" id="wpbooklist-search-refineby-language"/>
+									</div>
+								</div>
+
+
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-pubyear-word-wrapper">
+									<div id="wpbooklist-search-refine-pubyear-title">
+										<p>' . $this->trans->trans_660 . '</p>
+									</div>
+									<div id="wpbooklist-search-refine-pubyear-dropdown">
+										<select id="wpbooklist-search-refineby-pubyear-word">
+											<option>' . $this->trans->trans_661 . '</option>
+											<option>' . $this->trans->trans_662 . '</option>
+											<option>' . $this->trans->trans_663 . '</option>
+										</select>
+									</div>
+								</div>
+								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-pubyear-year-wrapper">
+									<div id="wpbooklist-search-refine-pubyear-dropdown">
+										<select id="wpbooklist-search-refineby-pubyear-year">
+											<option selected default disabled>' . $this->trans->trans_664 . '...</option>
+											' . $pub_year_options_string . '
+										</select>
+									</div>
+								</div>
 								' . $custom_drop_entries . '
 								<div class="wpbooklist-search-refine-search-row"  id="wpbooklist-search-refine-checkboxes-wrapper">
-									<div id="wpbooklist-search-refine-checkboxes-title">
-										<p>' . $this->trans->trans_607 . '...</p>
-									</div>
 									<div id="wpbooklist-search-refine-checkboxes-actual-wrapper">
 										<div class="wpbooklist-display-options-indiv-entry">
 											<div class="wpbooklist-display-options-label-div">
@@ -662,6 +853,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									</div>
 								</div>
 								<button id="wpbooklist-search-refinesearch-button">' . $this->trans->trans_607 . '</button>
+								<p id="wpbooklist-search-reset-refinements-bottom">' . $this->trans->trans_676 . '</p>
 							</form>
 						</div>';
 			}
@@ -862,9 +1054,58 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 					foreach ( $filter_term_array as $key => $indiv_filterterm ) {
 
-						$this->final_query = $this->final_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
+						$quit_flag = false;
 
-						$this->final_count_query = $this->final_count_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
+						// If the Publication Year Search Refinement is set...
+						if ( false !== stripos( $indiv_filterterm, 'pub_year_' ) ) {
+							// If user selected 'Publication Date is Exactly...'
+							if ( false !== stripos( $indiv_filterterm, 'pub_year_' . $this->trans->trans_661 ) ) {
+								$this->final_query = $this->final_query . ' AND ( pub_year = "' . $filter_values_array[ $key ] . '")';
+								$this->final_count_query = $this->final_count_query . ' AND ( pub_year = "' . $filter_values_array[ $key ] . '")';
+							}
+							// If user selected 'Publication Date is Before...'
+							if ( false !== stripos( $indiv_filterterm, 'pub_year_' . $this->trans->trans_662 ) ) {
+								$this->final_query = $this->final_query . ' AND ( pub_year < "' . $filter_values_array[ $key ] . '")';
+								$this->final_count_query = $this->final_count_query . ' AND ( pub_year < "' . $filter_values_array[ $key ] . '")';
+
+							}
+							// If user selected 'Publication Date is After...'
+							if ( false !== stripos( $indiv_filterterm, 'pub_year_' . $this->trans->trans_663 ) ) {
+								$this->final_query = $this->final_query . ' AND ( pub_year > "' . $filter_values_array[ $key ] . '")';
+								$this->final_count_query = $this->final_count_query . ' AND ( pub_year > "' . $filter_values_array[ $key ] . '")';
+							}
+							$quit_flag = true;
+						}
+
+						// If the Format Search Refinement is set...
+						if ( false !== stripos( $indiv_filterterm, 'format' ) ) {
+
+							// If the user has selected 'Other', then select everything that isn't one of the drop-down options and that isn't null...
+							if ( $this->trans->trans_670 === $filter_values_array[ $key ] ) {
+								$this->final_query = $this->final_query . ' AND ( format NOT LIKE "%' . $this->trans->trans_665 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_666 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_667 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_668 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_669 . '%")';
+								$this->final_count_query = $this->final_count_query . ' AND ( format NOT LIKE "%' . $this->trans->trans_665 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_666 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_667 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_668 . '%") AND ( format NOT LIKE "%' . $this->trans->trans_669 . '%")';
+							} else {
+								$this->final_query = $this->final_query . ' AND ( format LIKE "%' . $filter_values_array[ $key ] . '%")';
+								$this->final_count_query = $this->final_count_query . ' AND ( format LIKE "%' . $filter_values_array[ $key ] . '%")';
+							}
+							$quit_flag = true;
+						}
+
+						// If the Genres Search Refinement is set...
+						if ( false !== stripos( $indiv_filterterm, 'genres' ) ) {
+
+							$this->final_query = $this->final_query . ' AND (' . $indiv_filterterm . ' LIKE "%' . $filter_values_array[ $key ] . '%")';
+
+							$this->final_count_query = $this->final_count_query . ' AND (' . $indiv_filterterm . ' LIKE "%' . $filter_values_array[ $key ] . '%")';
+							$quit_flag = true;
+						}
+
+						// If we didn't meet any of the special conditions above, proceed, otherwise you're done with this iteration of the loop.
+						if ( ! $quit_flag ) {
+							$this->final_query = $this->final_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
+
+							$this->final_count_query = $this->final_count_query . ' AND (' . $indiv_filterterm . ' = "' . $filter_values_array[ $key ] . '")';
+						}
 					}
 				}
 
@@ -882,19 +1123,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				}
 			}
 
-			if ( 0 < (int) $this->offset_term ) {
-				foreach ( $this->actual_search_results as $key => $result ) {
-					if ( ( $key < (int) $this->offset_term ) || ( $key > ( (int) $this->offset_term + $this->search_extension_settings->perpage - 1 ) ) ) {
-						unset( $this->actual_search_results[ $key ] );
-					}
-				}
-			} else {
-				foreach ( $this->actual_search_results as $key => $result ) {
-					if ( $key > ( $this->search_extension_settings->perpage - 1 ) ) {
-						unset( $this->actual_search_results[ $key ] );
-					}
-				}
-			}
+			
 		}
 
 
@@ -955,6 +1184,18 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							$author_for_display = $value->author;
 						}
 
+						// Add in second author, if present.
+						if ( '' !== $value->author2 && null !== $value->author2 ) {
+							$author_for_display = $author_for_display . ', ' . $value->author2;
+						}
+
+						// Add in third author, if present.
+						if ( '' !== $value->author3 && null !== $value->author3 ) {
+							$author_for_display = $author_for_display . ', ' . $value->author3;
+						}
+
+
+
 						$this->search_results_actual_html = $this->search_results_actual_html .
 							'<div class="wpbooklist-search-results-listing">
 								<div class="wpbooklist-search-results-listing-img-wrapper">
@@ -966,13 +1207,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 					    				</p>
 									</div>
 									<div class="wpbooklist-search-results-listing-author-wrapper">
-										<p>' . $this->trans->trans_592 . ' ' . $author_for_display . '</p>
+										<p>' . $this->trans->trans_592 . ' ' . $author_for_display . ' - ' . $this->trans->trans_597 . ' ' . $value->pub_year . '</p>
 									</div>
-									<div class="wpbooklist-search-results-listing-pubdate-wrapper">
-										<p>' . $this->trans->trans_597 . ' ' . $value->pub_year . '</p>
-									</div>
-
-
 								</div>
 
 							</div>';

@@ -123,7 +123,7 @@ gulp.task( 'watch', function() {
 });
 
 // Default gulp task
-gulp.task( 'default', [ 'sassFrontendSource', 'sassBackendSource', 'concatAdminJs', 'concatFrontendJs', 'watch' ]);
+//gulp.task( 'default', [ 'sassFrontendSource', 'sassBackendSource', 'concatAdminJs', 'concatFrontendJs', 'watch' ]);
 
 
 //gulp.task( 'default', [ 'cleanzip' ]);
@@ -132,4 +132,4 @@ gulp.task( 'default', [ 'sassFrontendSource', 'sassBackendSource', 'concatAdminJ
 
 //gulp.task( 'default', [ 'zip' ]);
 
-//gulp.task( 'default', [ 'clean' ]);
+gulp.task( 'default', [ 'clean' ]);

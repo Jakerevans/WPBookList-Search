@@ -204,10 +204,22 @@ q:before,  #wpbooklist-search-wrapper q:after {
     font-size:0.8em;
 }
 
-#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper #wpbooklist-search-refine-search-title-wrapper p{
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper #wpbooklist-search-refine-search-title-wrapper #wpbooklist-search-reset-refinements-top-title{
     font-size:1em;
-    margin-bottom:20px;
+    margin-bottom:0px;
 }
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper #wpbooklist-search-refine-search-title-wrapper #wpbooklist-search-reset-refinements, #wpbooklist-search-reset-refinements-bottom{
+    font-size:0.7em!important;
+    margin-bottom:20px!important;
+    cursor: pointer;
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper #wpbooklist-search-refine-search-title-wrapper #wpbooklist-search-reset-refinements:hover, #wpbooklist-search-reset-refinements-bottom:hover{
+    text-decoration: underline;
+}
+
+
 
 #wpbooklist-search-wrapper #wpbooklist-search-refine-search-wrapper{
     max-width:20%;
@@ -219,7 +231,7 @@ q:before,  #wpbooklist-search-wrapper q:after {
     display:inline-block;
 }
 
-#wpbooklist-search-refine-search-wrapper select{
+#wpbooklist-search-refine-search-wrapper select, #wpbooklist-search-refine-search-wrapper input[type="text"]{
     font-size:0.8em;
     width:75%;
 }
@@ -239,4 +251,14 @@ q:before,  #wpbooklist-search-wrapper q:after {
 
 #wpbooklist-search-wrapper .wpbooklist-search-results-allcheckboxes-wrapper{
 
+}
+
+#wpbooklist-search-wrapper #wpbooklist-search-refine-pubyear-word-wrapper{
+    margin-bottom:5px;
+}
+
+#wpbooklist-search-results-top-wrapper .wpbooklist-search-results-listing .wpbooklist-search-results-listing-details-wrapper .wpbooklist_saved_title_link{
+    position: relative;
+    padding: 0;
+    height: initial;
 }
