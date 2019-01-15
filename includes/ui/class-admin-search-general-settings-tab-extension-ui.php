@@ -23,11 +23,11 @@ if ( ! class_exists( 'WPBookList_Search', false ) ) :
 		 */
 		public function __construct() {
 			require_once CLASS_DIR . 'class-admin-ui-template.php';
-			require_once SEARCH_CLASS_DIR . 'class-wpbooklist-search-form.php';
+			require_once SEARCH_CLASS_DIR . 'class-search-form.php';
 
 			// Get Translations.
-			require_once ROOT_WPBL_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
-			$this->trans = new WPBookList_Translations();
+			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
+			$this->trans = new WPBookList_Search_Translations();
 			$this->trans->trans_strings();
 
 			// Instantiate the class.
@@ -43,29 +43,29 @@ if ( ! class_exists( 'WPBookList_Search', false ) ) :
 		 * Opens the admin container for the tab
 		 */
 		private function output_open_admin_container(){
-			$title    = $this->trans->trans_637;
-			$icon_url = SEARCH_ROOT_IMG_URL . 'optimization.svg';
+			$title = 'Search General Settings';
+			$icon_url = SEARCH_ROOT_IMG_URL.'book.svg';
 			echo $this->template->output_open_admin_container($title, $icon_url);
 		}
 
 		/**
 		 * Outputs actual tab contents
 		 */
-		private function output_tab_content() {
+		private function output_tab_content(){
 			echo $this->form->output_search_form();
 		}
 
 		/**
 		 * Closes admin container
 		 */
-		private function output_close_admin_container() {
+		private function output_close_admin_container(){
 			echo $this->template->output_close_admin_container();
 		}
 
 		/**
 		 * Outputs advertisment area
 		 */
-		private function output_admin_template_advert() {
+		private function output_admin_template_advert(){
 			echo $this->template->output_template_advert();
 		}
 

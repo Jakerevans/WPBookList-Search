@@ -90,8 +90,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			global $wpdb;
 
-			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
-			$trans = new WPBookList_Search_Translations();
+			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+			$trans = new WPBookList_Translations();
 
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
 			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
@@ -126,8 +126,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
 
-				require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
-				$trans = new WPBookList_Search_Translations();
+				require_once SEARCH_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+				$trans = new WPBookList_Translations();
 
 				echo '
 				<div class="notice notice-success is-dismissible">
@@ -256,8 +256,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			wp_register_script( 'wpbooklist_search_adminjs', SEARCH_JS_URL . 'wpbooklist_search_admin.min.js', array( 'jquery' ), WPBOOKLIST_VERSION_NUM, true );
 
 			// Next 4-5 lines are required to allow translations of strings that would otherwise live in the wpbooklist-admin-js.js JavaScript File.
-			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
-			$trans = new WPBookList_Search_Translations();
+			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+			$trans = new WPBookList_Translations();
 
 			// Localize the script with the appropriate translation array from the Translations class.
 			$translation_array1 = $trans->trans_strings();
@@ -291,8 +291,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			wp_register_script( 'wpbooklist_search_frontendjs', SEARCH_JS_URL . 'wpbooklist_search_frontend.min.js', array( 'jquery' ), WPBOOKLIST_SEARCH_VERSION_NUM, true );
 
 			// Next 4-5 lines are required to allow translations of strings that would otherwise live in the wpbooklist-admin-js.js JavaScript File.
-			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
-			$trans = new WPBookList_Search_Translations();
+			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+			$trans = new WPBookList_Translations();
 
 			// Localize the script with the appropriate translation array from the Translations class.
 			$translation_array1 = $trans->trans_strings();
