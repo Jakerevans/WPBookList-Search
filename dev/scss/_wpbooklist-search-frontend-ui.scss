@@ -1,0 +1,141 @@
+#wpbooklist_search_right_fields_container{
+	width: 50%;
+    display: inline-block;
+    vertical-align:top;
+}
+
+#wpbooklist_search_left_textfields_container{
+	width: 45%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.wpbooklist-search-right-fields-row select{
+	min-width:80%;
+}
+
+.wpbooklist-search-right-fields-row input[type="text"]{
+	max-width:80%;
+}
+
+.wpbooklist-search-right-fields-row, .wpbooklist-search-left-textfields-row{
+	margin-bottom:30px;
+    height:50px;
+    position:relative;
+}
+
+#wpbooklist_search_top_container label{
+	margin-bottom:2px;
+    display:block;
+}
+
+#wpbooklist_search_top_container .wpbooklist-search-right-fields-row .wpbooklist-search-dropdown-pubyear{
+    min-width: initial;
+    max-width: 55%;
+    width: 35%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#wpbooklist_search_top_container .wpbooklist-search-right-fields-row .wpbooklist-search-dropdown-ratingyear{
+    min-width: initial;
+    max-width: 55%;
+    width: 35%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.wpbooklist-search-indiv-book-row{
+    height:150px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e5e5;
+    padding: 10px;
+    display: block;
+    position: relative;
+    width: 97%;
+}
+
+.wpbooklist-search-indiv-book-row p{
+    margin:0px;
+}
+
+.wpbooklist-search-indiv-book-img-wrapper{
+    display: inline-block;
+    float: left;
+    margin-right: 10px;
+}
+
+.wpbooklist-search-indiv-book-img-wrapper img{
+    max-width:75px;
+}
+
+.wpbooklist-search-indiv-book-title-wrapper{
+
+
+}
+
+.wpbooklist-search-indiv-book-title:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.wpbooklist-search-indiv-book-img-wrapper img:hover {
+    cursor: pointer;
+    box-shadow: 9px 16px 20px #888888;
+}
+
+.wpbooklist-search-indiv-book-title{
+    font-weight:bold;
+}
+
+.wpbooklist-search-indiv-book-title, .wpbooklist-search-indiv-book-img-wrapper img{
+    cursor: pointer;
+}
+
+#wpbooklist-search-results-main-wrapper{
+    margin-top:10px;
+}
+
+.wpbooklist-search-reset{
+    display: inline-block;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+#wpbooklist-search-submit-search-div{
+    display: inline-block;
+    vertical-align: bottom;
+    cursor: pointer;
+}
+
+#wpbooklist-search-results-stats-wrapper{
+    margin-top: 40px;
+    font-size: 16px;
+    text-align: center;
+}
+
+#wpbooklist_search_top_container .wpbooklist-storytime-shocked-img-front {
+    width: 30px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+}
+
+#wpbooklist-search-no-results-found{
+    text-align: center;
+}
+
+
+#wpbooklist_search_top_container .wpbooklist-pagination-div{
+    text-align:center;
+}
+
+#wpbooklist_search_top_container .wpbooklist-pagination-left-div, #wpbooklist_search_top_container .wpbooklist-pagination-right-div{
+    vertical-align: top;
+}
+
+#wpbooklist_search_top_container .wpbooklist-pagination-left-div p, #wpbooklist_search_top_container .wpbooklist-pagination-right-div p{
+    margin: 5px;
+    margin-bottom: 8px;
+}

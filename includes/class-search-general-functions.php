@@ -31,51 +31,192 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			}
 		}
 
-
 		/**
-		 * Verifies the license for the extension is valid - otherwise, the Extension doesn't load.
+		 * Verifies the crown of the rose.
 		 *
 		 * @param  array $plugins List of plugins to activate & load.
 		 */
-		public function wpbooklist_search_verify_license( $plugins ) {
+		public function wpbooklist_search_smell_rose() {
 
 			global $wpdb;
 
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
-			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
-
-			$unnecessary_plugins[] = 'wpbooklist-search/wpbooklist-search.php';
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
 			// If the License Key just hasn't been entered yet...
-			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
-
-				foreach ( $unnecessary_plugins as $plugin ) {
-					$k = array_search( $plugin, $plugins );
-					if ( false !== $k ) {
-						unset( $plugins[ $k ] );
-					}
-				}
-
-				return $plugins;
-
+			if ( null === $this->extension_settings->freg || '' === $this->extension_settings->freg ) {
+				return;
 			} else {
 
-				// If a License key has been saved, let's verify it, and if it's not good, don't load the plugin.
-				$license_good_flag = true;
+				if ( false !== stripos( $this->extension_settings->freg, '---' ) ) {
 
-				if ( $license_good_flag ) {
-					return $plugins;
+					$temp = explode( '---', $this->extension_settings->freg );
+
+					if ( 'aod' === $temp[1] ) {
+
+						// Get the date.
+						require_once ROOT_WPBL_UTILITIES_DIR . 'class-wpbooklist-utilities-date.php';
+						$utilities_date = new WPBookList_Utilities_Date();
+						$this->date     = $utilities_date->wpbooklist_get_date_via_current_time( 'timestamp' );
+
+						if ( 604800 < ( $this->date - (int) $temp[2] ) ) {
+
+							$checker_good_flag = false;
+
+							$san_check = wp_remote_get( 'https://wpbooklist.com/?edd_action=activate_license&item_id=' . EDD_SL_ITEM_ID_SEARCH . '&license=' . $temp[0] . '&url=' . get_site_url() );
+
+							// Check the response code.
+							$response_code    = wp_remote_retrieve_response_code( $san_check );
+							$response_message = wp_remote_retrieve_response_message( $san_check );
+
+							if ( 200 !== $response_code && ! empty( $response_message ) ) {
+								return new WP_Error( $response_code, $response_message );
+							} elseif ( 200 !== $response_code ) {
+								$this->apireport = $this->apireport . 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function ';
+								return new WP_Error( $response_code, 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function' );
+							} else {
+								$san_check = wp_remote_retrieve_body( $san_check );
+								$san_check = json_decode( $san_check, true );
+
+								if ( 'valid' === $san_check['license'] && $san_check['success'] ) {
+
+									$this->date = $utilities_date->wpbooklist_get_date_via_current_time( 'timestamp' );
+
+									$data         = array(
+										'freg' => $temp[0] . '---aod---' . $this->date,
+									);
+									$format       = array( '%s' );
+									$where        = array( 'ID' => 1 );
+									$where_format = array( '%d' );
+									$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
+
+									$checker_good_flag = true;
+								} else {
+									$data         = array(
+										'freg' => '',
+									);
+									$format       = array( '%s' );
+									$where        = array( 'ID' => 1 );
+									$where_format = array( '%d' );
+									$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
+								}
+							}
+
+							if ( ! $checker_good_flag ) {
+								deactivate_plugins( SEARCH_ROOT_DIR . 'wpbooklist-search.php' );
+								return;
+							}
+						} else {
+							return;
+						}
+					} else {
+
+						$checker_good_flag = false;
+
+						$san_check = wp_remote_get( 'https://wpbooklist.com/?edd_action=activate_license&item_id=' . EDD_SL_ITEM_ID_SEARCH . '&license=' . $this->extension_settings->freg . '&url=' . get_site_url() );
+
+						// Check the response code.
+						$response_code    = wp_remote_retrieve_response_code( $san_check );
+						$response_message = wp_remote_retrieve_response_message( $san_check );
+
+						if ( 200 !== $response_code && ! empty( $response_message ) ) {
+							return new WP_Error( $response_code, $response_message );
+						} elseif ( 200 !== $response_code ) {
+							$this->apireport = $this->apireport . 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function ';
+							return new WP_Error( $response_code, 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function' );
+						} else {
+							$san_check = wp_remote_retrieve_body( $san_check );
+							$san_check = json_decode( $san_check, true );
+
+							if ( 'valid' === $san_check['license'] && $san_check['success'] ) {
+
+								// Get the date.
+								require_once ROOT_WPBL_UTILITIES_DIR . 'class-wpbooklist-utilities-date.php';
+								$utilities_date = new WPBookList_Utilities_Date();
+								$this->date     = $utilities_date->wpbooklist_get_date_via_current_time( 'timestamp' );
+
+								$data         = array(
+									$this->extension_settings->freg . '---aod---' . $this->date,
+								);
+								$format       = array( '%s' );
+								$where        = array( 'ID' => 1 );
+								$where_format = array( '%d' );
+								$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
+
+								$checker_good_flag = true;
+
+							} else {
+								$data         = array(
+									'freg' => '',
+								);
+								$format       = array( '%s' );
+								$where        = array( 'ID' => 1 );
+								$where_format = array( '%d' );
+								$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
+							}
+						}
+
+						if ( ! $checker_good_flag ) {
+							deactivate_plugins( SEARCH_ROOT_DIR . 'wpbooklist-search.php' );
+							return;
+						}
+					}
 				} else {
 
-					foreach ( $unnecessary_plugins as $plugin ) {
-						$k = array_search( $plugin, $plugins );
-						if ( false !== $k ) {
-							unset( $plugins[ $k ] );
+					$checker_good_flag = false;
+
+					$san_check = wp_remote_get( 'https://wpbooklist.com/?edd_action=activate_license&item_id=' . EDD_SL_ITEM_ID_SEARCH . '&license=' . $this->extension_settings->freg . '&url=' . get_site_url() );
+
+					// Check the response code.
+					$response_code    = wp_remote_retrieve_response_code( $san_check );
+					$response_message = wp_remote_retrieve_response_message( $san_check );
+
+					if ( 200 !== $response_code && ! empty( $response_message ) ) {
+						return new WP_Error( $response_code, $response_message );
+					} elseif ( 200 !== $response_code ) {
+						$this->apireport = $this->apireport . 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function ';
+						return new WP_Error( $response_code, 'Unknown error occurred with wp_remote_get() trying to build Books-a-Million link in the create_buy_links() function' );
+					} else {
+						$san_check = wp_remote_retrieve_body( $san_check );
+						$san_check = json_decode( $san_check, true );
+
+						if ( 'valid' === $san_check['license'] && $san_check['success'] ) {
+
+							// Get the date.
+							require_once ROOT_WPBL_UTILITIES_DIR . 'class-wpbooklist-utilities-date.php';
+							$utilities_date = new WPBookList_Utilities_Date();
+							$this->date     = $utilities_date->wpbooklist_get_date_via_current_time( 'timestamp' );
+
+							$data         = array(
+								'freg' => $this->extension_settings->freg . '---aod---' . $this->date,
+							);
+							$format       = array( '%s' );
+							$where        = array( 'ID' => 1 );
+							$where_format = array( '%d' );
+							$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
+
+							$checker_good_flag = true;
+
+						} else {
+							$data         = array(
+								'freg' => '',
+							);
+							$format       = array( '%s' );
+							$where        = array( 'ID' => 1 );
+							$where_format = array( '%d' );
+							$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );
 						}
 					}
 
-					return $plugins;
+					if ( ! $checker_good_flag ) {
+						deactivate_plugins( SEARCH_ROOT_DIR . 'wpbooklist-search.php' );
 
+						if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+							//header( 'Location: ' . filter_var( wp_unslash( $_SERVER['REQUEST_URI'] ), FILTER_SANITIZE_STRING ) );
+						}
+
+						return;
+					}
 				}
 			}
 		}
@@ -92,20 +233,18 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
 			$trans = new WPBookList_Translations();
-
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
-			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
-
-			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
-				$value = $trans->trans_1;
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
+			if ( null === $this->extension_settings->freg || '' === $this->extension_settings->freg ) {
+				$value = $trans->trans_613;
 			} else {
-				$value = $this->extension_settings->license;
+				$value = $this->extension_settings->freg;
 			}
 
 			$license_html = '
 				<form>
-					<input id="wpbooklist-extension-licence-key-plugins-page-input-search" class="wpbooklist-extension-licence-key-plugins-page-input" type="text" placeholder="' . $trans->trans_1 . '" value="' . $value . '"></input>
-					<button id="wpbooklist-extension-licence-key-plugins-page-button-search" class="wpbooklist-extension-licence-key-plugins-page-button">' . $trans->trans_2 . '</button>
+					<input id="wpbooklist-extension-licence-key-plugins-page-input-search" class="wpbooklist-extension-licence-key-plugins-page-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $value . '"></input>
+					<button id="wpbooklist-extension-genreric-key-plugins-page-button-search" class="wpbooklist-extension-genreric-key-plugins-page-button">' . $trans->trans_614 . '</button>
 				</form>';
 
 			array_push( $links, $license_html );
@@ -122,19 +261,19 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			global $wpdb;
 
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
-			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
-			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+			if ( null === $this->extension_settings->freg || '' === $this->extension_settings->freg ) {
 
-				require_once SEARCH_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+				require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
 				$trans = new WPBookList_Translations();
 
 				echo '
 				<div class="notice notice-success is-dismissible">
-					<form class="wpbooklist-extension-licence-key-dashboard-form" id="wpbooklist-extension-licence-key-dashboard-form-search">
-						<p class="wpbooklist-extension-licence-key-dashboard-title">' . $trans->trans_3 . '</p>
-						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-licence-key-dashboard-input" type="text" placeholder="' . $trans->trans_1 . '" value="' . $trans->trans_1 . '"></input>
-						<button data-ext="search" id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_4 . '</button>
+					<form class="wpbooklist-extension-genreric-key-dashboard-form" id="wpbooklist-extension-genreric-key-dashboard-form-search">
+						<p class="wpbooklist-extension-licence-key-dashboard-title">' . $trans->trans_615 . '</p>
+						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-genreric-key-dashboard-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $trans->trans_613 . '"></input>
+						<button data-ext="search" id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_614 . '</button>
 					</form>
 				</div>';
 			}
@@ -151,10 +290,10 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			global $wpdb;
 
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
-			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
 			// If the License Key just hasn't been entered yet...
-			if ( null === $this->extension_settings->license || '' === $this->extension_settings->license ) {
+			if ( null === $this->extension_settings->freg || '' === $this->extension_settings->freg ) {
 
 				return $submenu_array;
 
@@ -339,7 +478,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_register_table_name() {
 			global $wpdb;
-			$wpdb->wpbooklist_search_options = "{$wpdb->prefix}wpbooklist_search_options";
+			$wpdb->wpbooklist_search_settings = "{$wpdb->prefix}wpbooklist_search_settings";
 		}
 
 		/**
@@ -362,24 +501,24 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			// Call this manually as we may have missed the init hook.
 			$this->wpbooklist_search_register_table_name();
 
-			$sql_create_table1 = "CREATE TABLE {$wpdb->wpbooklist_search_options}
+			$sql_create_table1 = "CREATE TABLE {$wpdb->wpbooklist_search_settings}
 			(
 				ID bigint(190) auto_increment,
 				perpage bigint(255) NOT NULL DEFAULT 20,
 				hidesearchby TEXT,
 				hidesearchin TEXT,
 				hidesearchfilter varchar(255),
-				license varchar(255),
+				freg varchar(255),
 				searchmode varchar(255) NOT NULL DEFAULT 'inclusive',
 				PRIMARY KEY  (ID),
 				KEY perpage (perpage)
 			) $charset_collate; ";
 
 			// If table doesn't exist, create table and add initial data to it.
-			$test_name = $wpdb->prefix . 'wpbooklist_search_options';
+			$test_name = $wpdb->prefix . 'wpbooklist_search_settings';
 			if ( $test_name !== $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
 				dbDelta( $sql_create_table1 );
-				$table_name = $wpdb->prefix . 'wpbooklist_search_options';
+				$table_name = $wpdb->prefix . 'wpbooklist_search_settings';
 				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20, 'searchmode' => 'inclusive', ) );
 			}
 		}

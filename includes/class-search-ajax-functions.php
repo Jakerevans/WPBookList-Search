@@ -27,20 +27,20 @@ if ( ! class_exists( 'Search_Ajax_Functions', false ) ) :
 		}
 
 		/**
-		 * Callback function for handling the saving of the user's License Key.
+		 * Callback function for handling.
 		 */
-		public function wpbooklist_search_save_license_key_action_callback() {
+		public function wpbooklist_search_save_review_key_action_callback() {
 
 			global $wpdb;
 
-			check_ajax_referer( 'wpbooklist_search_save_license_key_action_callback', 'security' );
+			check_ajax_referer( 'wpbooklist_search_save_review_key_action_callback', 'security' );
 
-			if ( isset( $_POST['license'] ) ) {
-				$license = filter_var( wp_unslash( $_POST['license'] ), FILTER_SANITIZE_STRING );
+			if ( isset( $_POST['picker'] ) ) {
+				$salt = filter_var( wp_unslash( $_POST['picker'] ), FILTER_SANITIZE_STRING );
 			}
 
 			$data         = array(
-				'repw' => $license,
+				'freg' => $salt,
 			);
 			$format       = array( '%s' );
 			$where        = array( 'ID' => 1 );

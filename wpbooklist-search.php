@@ -10,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name: WPBookList Search Extension
  * Plugin URI: https://www.jakerevans.com
- * Description: A Boilerplate Extension for WPBookList that creates a menu page and has it's own tabs.
- * Version: 6.0.0
+ * Description: A WPBookList Extension that displays an Advanced Search Page.
+ * Version: 1.0.0
  * Author: Jake Evans
  * Text Domain: wpbooklist
  * Author URI: https://www.jakerevans.com
@@ -60,11 +60,17 @@ global $wpdb;
 
 	// Root plugin folder directory.
 	if ( ! defined('WPBOOKLIST_VERSION_NUM' ) ) {
-		define( 'WPBOOKLIST_VERSION_NUM', '6.1.2' );
+		define( 'WPBOOKLIST_VERSION_NUM', '6.1.6' );
 	}
 
 	// This Extension's Version Number.
-	define( 'WPBOOKLIST_SEARCH_VERSION_NUM', '6.1.2' );
+	define( 'WPBOOKLIST_SEARCH_VERSION_NUM', '6.1.6' );
+
+	// This is the URL our updater / license checker pings. This should be the URL of the site with EDD installed.
+	define( 'EDD_SL_STORE_URL_SEARCH', 'https://wpbooklist.com' );
+
+	// The id of your product in EDD.
+	define( 'EDD_SL_ITEM_ID_SEARCH', 14909 );
 
 	// Root plugin folder directory.
 	define( 'SEARCH_ROOT_DIR', plugin_dir_path( __FILE__ ) );
@@ -155,9 +161,7 @@ global $wpdb;
 	// Nonces array.
 	define( 'SEARCH_NONCES_ARRAY',
 		wp_json_encode(array(
-			'adminnonce1'  => 'wpbooklist_search_save_license_key_action_callback',
-			'adminnonce2'  => 'wpbooklist_search_save_search_field_settings_action_callback',
-			'adminnonce3'  => 'wpbooklist_search_save_search_general_settings_action_callback',
+			'adminnonce1'  => 'wpbooklist_search_save_review_key_action_callback',
 		))
 	);
 
@@ -226,8 +230,20 @@ global $wpdb;
 	// Runs once upon extension activation and adds it's version number to the 'extensionversions' column in the 'wpbooklist_jre_user_options' table of the core plugin.
 	register_activation_hook( __FILE__, array( $search_general_functions, 'wpbooklist_search_record_extension_version' ) );
 
-	// Adding the front-end search shortcode.
-	add_shortcode( 'wpbooklist_search', array( $search_general_functions, 'wpbooklist_search_plugin_dynamic_shortcode_function' ) );
+	// License verification function.
+	add_filter( 'admin_footer', array( $search_general_functions, 'wpbooklist_search_smell_rose' ) );
+
+
+global $wpdb;
+$test_name = $wpdb->prefix . 'wpbooklist_search_settings';
+if ( $test_name === $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
+	$extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
+	if ( false !== stripos( $extension_settings->freg, 'aod' ) ) {
+		// Adding the front-end search shortcode.
+		add_shortcode( 'wpbooklist_search', array( $search_general_functions, 'wpbooklist_search_plugin_dynamic_shortcode_function' ) );
+	}
+}
+	
 
 
 /* END OF FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
@@ -235,7 +251,7 @@ global $wpdb;
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-AJAX-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 
 	// Callback function for handling the saving of the user's License Key.
-	add_action( 'wp_ajax_wpbooklist_search_save_license_key_action', array( $search_ajax_functions, 'wpbooklist_search_save_license_key_action_callback' ) );
+	add_action( 'wp_ajax_wpbooklist_search_save_review_key_action', array( $search_ajax_functions, 'wpbooklist_search_save_review_key_action_callback' ) );
 
 	// For receiving user feedback upon deactivation & deletion.
 	add_action( 'wp_ajax_search_exit_results_action', array( $search_ajax_functions, 'search_exit_results_action_callback' ) );
