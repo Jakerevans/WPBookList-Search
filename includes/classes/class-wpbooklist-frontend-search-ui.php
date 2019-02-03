@@ -36,7 +36,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		/**
 		 * Class Constructor
 		 */
-		public function __construct() {
+		public function __construct( $action ) {
 			require_once CLASS_DIR . 'class-admin-ui-template.php';
 			require_once SEARCH_CLASS_DIR . 'class-wpbooklist-search-form.php';
 
@@ -44,6 +44,8 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
 			$this->trans = new WPBookList_Translations();
 			$this->trans->trans_strings();
+
+			$this->action = $action;
 
 			$this->get_url_params();
 			$this->build_db_query();
@@ -115,7 +117,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				error_log(print_r($existing_columns,true));
 				*/
 
-				$this->finalquery = "(SELECT title, image, author, author2, author3, ID, pub_year, '" . $wpdb->prefix . "wpbooklist_jre_saved_book_log' as Source FROM " . $wpdb->prefix . 'wpbooklist_jre_saved_book_log WHERE ';
+				$this->finalquery = "(SELECT title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, '" . $wpdb->prefix . "wpbooklist_jre_saved_book_log' as source FROM " . $wpdb->prefix . 'wpbooklist_jre_saved_book_log WHERE ';
 
 				$beforepubdate  = false;
 				$afterpubdate   = false;
@@ -316,7 +318,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$dyna_query = '';
 				foreach ( $db_row as $table ) {
 					$dyna_query = $dyna_query . str_replace( 'saved_book_log', $table->user_table_name, $this->finalquery ) . ' UNION ALL ';
-					$count_query = $count_query . str_replace( "title, image, author, author2, author3, ID, pub_year, '".$wpdb->prefix."wpbooklist_jre_".$table->user_table_name."' as Source", '* ', str_replace('(','',$dyna_query) );
+					$count_query = $count_query . str_replace( "title, image, author, author2, author3, ID, pub_year, '".$wpdb->prefix."wpbooklist_jre_".$table->user_table_name."' as source", '* ', str_replace('(','',$dyna_query) );
 					$count_query = str_replace( ")", '', $count_query );
 					$count_query = $count_query . 'UNION ALL';
 				}
@@ -687,24 +689,94 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 				}
 
+				if ( 'page' === $this->action ) {
+					if ( ( null !== $book->page_yes && 'false' !== $book->page_yes && 'N/A' !== $book->page_yes && 'no' !== $book->page_yes && 'No' !== $book->page_yes ) && '' !== get_permalink( $book->page_yes ) && null !== get_permalink( $book->page_yes )   ) {
 
+						$this->output_search_results_actual = $this->output_search_results_actual . '
+							<div class="wpbooklist-search-indiv-book-row">
+								<div class="wpbooklist-search-indiv-book-img-wrapper">
+								 	<a href="' . get_permalink( $book->page_yes ) . '"><img class="wpbooklist_cover_image_class" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '" src="' . $book->image . '" style="opacity: 1;"></a>
+								 </div>
+								<div class="wpbooklist-search-indiv-book-title-details-wrapper">
+									<div class="wpbooklist-search-indiv-book-title-wrapper">
+										 <a href="' . get_permalink( $book->page_yes ) . '">
+										 	<p class="wpbooklist-search-indiv-book-title" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '">' . $book->title . '</p>
+						    			</a>
+									</div>
+									<div class="wpbooklist-search-indiv-book-details-wrapper">
+										<p>' . $author . ' - ' . $book->pub_year . '</p>
+									</div>
+								</div>
+							</div>';
+					} else {
+						$this->output_search_results_actual = $this->output_search_results_actual . '
 
-				$this->output_search_results_actual = $this->output_search_results_actual . '
+						<div class="wpbooklist-search-indiv-book-row">
+							<div class="wpbooklist-search-indiv-book-img-wrapper">
+								<img class="wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '" src="' . $book->image . '" />
+							</div>
+							<div class="wpbooklist-search-indiv-book-title-details-wrapper">
+								<div class="wpbooklist-search-indiv-book-title-wrapper">
+									<p class="wpbooklist-search-indiv-book-title wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '">' . $book->title . '</p>
+								</div>
+								<div class="wpbooklist-search-indiv-book-details-wrapper">
+									<p>' . $author . ' - ' . $book->pub_year . '</p>
+								</div>
+							</div>
+						</div>';
+					}
+				} else if ( 'post' === $this->action ) {
+					if ( ( null !== $book->post_yes && 'false' !== $book->post_yes && 'N/A' !== $book->post_yes && 'no' !== $book->post_yes && 'No' !== $book->post_yes ) && '' !== get_permalink( $book->post_yes ) && null !== get_permalink( $book->post_yes )   ) {
+						$this->output_search_results_actual = $this->output_search_results_actual . '
+							<div class="wpbooklist-search-indiv-book-row">
+								<div class="wpbooklist-search-indiv-book-img-wrapper">
+								 	<a href="' . get_permalink( $book->post_yes ) . '"><img class="wpbooklist_cover_image_class" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '" src="' . $book->image . '" style="opacity: 1;"></a>
+								 </div>
+								<div class="wpbooklist-search-indiv-book-title-details-wrapper">
+									<div class="wpbooklist-search-indiv-book-title-wrapper">
+										 <a href="' . get_permalink( $book->post_yes ) . '">
+										 	<p class="wpbooklist-search-indiv-book-title" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '">' . $book->title . '</p>
+						    			</a>
+									</div>
+									<div class="wpbooklist-search-indiv-book-details-wrapper">
+										<p>' . $author . ' - ' . $book->pub_year . '</p>
+									</div>
+								</div>
+							</div>';
+					} else {
+						$this->output_search_results_actual = $this->output_search_results_actual . '
+
+							<div class="wpbooklist-search-indiv-book-row">
+								<div class="wpbooklist-search-indiv-book-img-wrapper">
+									<img class="wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '" src="' . $book->image . '" />
+								</div>
+								<div class="wpbooklist-search-indiv-book-title-details-wrapper">
+									<div class="wpbooklist-search-indiv-book-title-wrapper">
+										<p class="wpbooklist-search-indiv-book-title wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '">' . $book->title . '</p>
+									</div>
+									<div class="wpbooklist-search-indiv-book-details-wrapper">
+										<p>' . $author . ' - ' . $book->pub_year . '</p>
+									</div>
+								</div>
+							</div>';
+					}
+				} else {
+					$this->output_search_results_actual = $this->output_search_results_actual . '
 
 					<div class="wpbooklist-search-indiv-book-row">
 						<div class="wpbooklist-search-indiv-book-img-wrapper">
-							<img class="wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->Source . '" src="' . $book->image . '" />
+							<img class="wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '" src="' . $book->image . '" />
 						</div>
 						<div class="wpbooklist-search-indiv-book-title-details-wrapper">
 							<div class="wpbooklist-search-indiv-book-title-wrapper">
-								<p class="wpbooklist-search-indiv-book-title wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->Source . '">' . $book->title . '</p>
+								<p class="wpbooklist-search-indiv-book-title wpbooklist-show-book-colorbox" data-bookid="' . $book->ID . '" data-booktable="' . $book->source . '">' . $book->title . '</p>
 							</div>
 							<div class="wpbooklist-search-indiv-book-details-wrapper">
-								<p>' . $author . ' - Published In ' . $book->pub_year . '</p>
+								<p>' . $author . ' - ' . $book->pub_year . '</p>
 							</div>
 						</div>
 					</div>';
-
+				}
 			}
 
 			$this->output_search_results_actual = $this->output_search_results_actual . '</div>';

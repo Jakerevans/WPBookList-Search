@@ -529,22 +529,14 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 		 */
 		public function wpbooklist_search_plugin_dynamic_shortcode_function( $atts ) {
 			global $wpdb;
-			/*
+
 			extract(
 				shortcode_atts(
 					array(
-						'table'  => $wpdb->prefix . "wpbooklist_jre_saved_book_log",
 						'action' => 'colorbox',
 					),
 				$atts )
 			);
-
-			// Set up the table.
-			if ( isset( $atts['table'] ) ) {
-				$which_table = $wpdb->prefix . 'wpbooklist_jre_' . $table;
-			} else {
-				$which_table = $wpdb->prefix . 'wpbooklist_jre_saved_book_log';
-			}
 
 			// Set up the action taken when cover image is clicked on.
 			if ( isset( $atts['action'] ) ) {
@@ -554,15 +546,12 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			}
 
 			if ( null === $atts ) {
-				$which_table = $wpdb->prefix . 'wpbooklist_jre_saved_book_log';
 				$action      = 'colorbox';
 			}
 
-			$offset = 0;
-			*/
 			ob_start();
 			include_once SEARCH_CLASS_DIR . 'class-wpbooklist-frontend-search-ui.php';
-			$front_end_library_ui = new WPBookList_Frontend_Search_UI( );
+			$front_end_library_ui = new WPBookList_Frontend_Search_UI( $action );
 			return ob_get_clean();
 		}
 
