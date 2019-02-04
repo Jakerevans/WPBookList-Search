@@ -38,7 +38,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			global $wpdb;
 
 			// Get the saved search options to populate the checkboxes.
-			$searchopts = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+			$searchopts = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
 			$options = '';
 			if ( 'inclusive' === $searchopts->searchmode ) {

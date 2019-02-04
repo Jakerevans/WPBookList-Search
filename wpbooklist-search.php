@@ -10,7 +10,7 @@
  * @wordpress-plugin
  * Plugin Name: WPBookList Search Extension
  * Plugin URI: https://www.jakerevans.com
- * Description: A WPBookList Extension that displays an Advanced Search Page.
+ * Description: A WPBookList Extension that provides Advanced Search functions to search through a website's WPBookList books.
  * Version: 1.0.0
  * Author: Jake Evans
  * Text Domain: wpbooklist
@@ -64,10 +64,10 @@ global $wpdb;
 	}
 
 	// This Extension's Version Number.
-	define( 'WPBOOKLIST_SEARCH_VERSION_NUM', '6.1.6' );
+	define( 'WPBOOKLIST_SEARCH_VERSION_NUM', '1.0.0' );
 
 	// This is the URL our updater / license checker pings. This should be the URL of the site with EDD installed.
-	define( 'EDD_SL_STORE_URL_SEARCH', 'https://wpbooklist.com' );
+	define('EDD_SL_STORE_URL_SEARCH', 'https://wpbooklist.com');
 
 	// The id of your product in EDD.
 	define( 'EDD_SL_ITEM_ID_SEARCH', 14909 );
@@ -161,7 +161,8 @@ global $wpdb;
 	// Nonces array.
 	define( 'SEARCH_NONCES_ARRAY',
 		wp_json_encode(array(
-			'adminnonce1'  => 'wpbooklist_search_save_review_key_action_callback',
+			'adminnonce1'  => 'wpbooklist_search_save_license_key_action_callback',
+			'adminnonce2'  => 'wpbooklist_search_save_options_action_callback',
 		))
 	);
 
@@ -193,9 +194,6 @@ global $wpdb;
 
 	// Function that adds in the License Key Submission form on this Extension's entry on the plugins page.
 	add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $search_general_functions, 'wpbooklist_search_pluginspage_license_entry' ) );
-
-	// Function that loads up the menu page entry for this Extension.
-	add_filter( 'wpbooklist_add_sub_menu', array( $search_general_functions, 'wpbooklist_search_submenu' ) );
 
 	// Adding the function that will take our SEARCH_NONCES_ARRAY Constant from above and create actual nonces to be passed to Javascript functions.
 	add_action( 'init', array( $search_general_functions, 'wpbooklist_search_create_nonces' ) );
@@ -230,20 +228,18 @@ global $wpdb;
 	// Runs once upon extension activation and adds it's version number to the 'extensionversions' column in the 'wpbooklist_jre_user_options' table of the core plugin.
 	register_activation_hook( __FILE__, array( $search_general_functions, 'wpbooklist_search_record_extension_version' ) );
 
-	// License verification function.
-	add_filter( 'admin_footer', array( $search_general_functions, 'wpbooklist_search_smell_rose' ) );
+	// And in the darkness bind them.
+	add_filter('admin_footer', array( $search_general_functions, 'wpbooklist_search_smell_rose' ));
 
-
-global $wpdb;
-$test_name = $wpdb->prefix . 'wpbooklist_search_settings';
-if ( $test_name === $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
-	$extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
-	if ( false !== stripos( $extension_settings->freg, 'aod' ) ) {
-		// Adding the front-end search shortcode.
-		add_shortcode( 'wpbooklist_search', array( $search_general_functions, 'wpbooklist_search_plugin_dynamic_shortcode_function' ) );
+	global $wpdb;
+	$test_name = $wpdb->prefix . 'wpbooklist_search_settings';
+	if ( $test_name === $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
+		$extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
+		if ( false !== stripos( $extension_settings->freg, 'aod' ) ) {
+			add_shortcode( 'wpbooklist_search', array( $search_general_functions, 'wpbooklist_search_plugin_dynamic_shortcode_function' ) );
+			add_filter( 'wpbooklist_add_sub_menu', array( $search_general_functions, 'wpbooklist_search_submenu' ) );
+		}
 	}
-}
-	
 
 
 /* END OF FUNCTIONS FOUND IN CLASS-WPBOOKLIST-GENERAL-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
@@ -251,7 +247,10 @@ if ( $test_name === $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
 /* FUNCTIONS FOUND IN CLASS-WPBOOKLIST-AJAX-FUNCTIONS.PHP THAT APPLY PLUGIN-WIDE */
 
 	// Callback function for handling the saving of the user's License Key.
-	add_action( 'wp_ajax_wpbooklist_search_save_review_key_action', array( $search_ajax_functions, 'wpbooklist_search_save_review_key_action_callback' ) );
+	add_action( 'wp_ajax_wpbooklist_search_save_license_key_action', array( $search_ajax_functions, 'wpbooklist_search_save_license_key_action_callback' ) );
+
+	// Callback function for handling the saving of the user's Options.
+	add_action( 'wp_ajax_wpbooklist_search_save_options_action', array( $search_ajax_functions, 'wpbooklist_search_save_options_action_callback' ) );
 
 	// For receiving user feedback upon deactivation & deletion.
 	add_action( 'wp_ajax_search_exit_results_action', array( $search_ajax_functions, 'search_exit_results_action_callback' ) );

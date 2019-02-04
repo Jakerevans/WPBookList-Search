@@ -31,6 +31,9 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			}
 		}
 
+		
+
+
 		/**
 		 * Verifies the crown of the rose.
 		 *
@@ -136,7 +139,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 								$this->date     = $utilities_date->wpbooklist_get_date_via_current_time( 'timestamp' );
 
 								$data         = array(
-									$this->extension_settings->freg . '---aod---' . $this->date,
+									'freg' => $this->extension_settings->freg . '---aod---' . $this->date,
 								);
 								$format       = array( '%s' );
 								$where        = array( 'ID' => 1 );
@@ -233,8 +236,10 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
 			$trans = new WPBookList_Translations();
+
 			// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
 			$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
+
 			if ( null === $this->extension_settings->freg || '' === $this->extension_settings->freg ) {
 				$value = $trans->trans_613;
 			} else {
@@ -243,8 +248,8 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 			$license_html = '
 				<form>
-					<input id="wpbooklist-extension-licence-key-plugins-page-input-search" class="wpbooklist-extension-licence-key-plugins-page-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $value . '"></input>
-					<button id="wpbooklist-extension-genreric-key-plugins-page-button-search" class="wpbooklist-extension-genreric-key-plugins-page-button">' . $trans->trans_614 . '</button>
+					<input id="wpbooklist-extension-genreric-key-plugins-page-button-search" class="wpbooklist-extension-licence-key-plugins-page-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $value . '"></input>
+					<button id="wpbooklist-extension-licence-key-plugins-page-button-search" class="wpbooklist-extension-licence-key-plugins-page-button">' . $trans->trans_614 . '</button>
 				</form>';
 
 			array_push( $links, $license_html );
@@ -270,9 +275,9 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 
 				echo '
 				<div class="notice notice-success is-dismissible">
-					<form class="wpbooklist-extension-genreric-key-dashboard-form" id="wpbooklist-extension-genreric-key-dashboard-form-search">
+					<form class="wpbooklist-extension-licence-key-dashboard-form" id="wpbooklist-extension-licence-key-dashboard-form-search">
 						<p class="wpbooklist-extension-licence-key-dashboard-title">' . $trans->trans_615 . '</p>
-						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-genreric-key-dashboard-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $trans->trans_613 . '"></input>
+						<input id="wpbooklist-extension-licence-key-dashboard-input-search" class="wpbooklist-extension-licence-key-dashboard-input" type="text" placeholder="' . $trans->trans_613 . '" value="' . $trans->trans_613 . '"></input>
 						<button data-ext="search" id="wpbooklist-extension-licence-key-dashboard-button-search" class="wpbooklist-extension-licence-key-dashboard-button">' . $trans->trans_614 . '</button>
 					</form>
 				</div>';
@@ -505,11 +510,10 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			(
 				ID bigint(190) auto_increment,
 				perpage bigint(255) NOT NULL DEFAULT 20,
-				hidesearchby TEXT,
-				hidesearchin TEXT,
-				hidesearchfilter varchar(255),
+				formatvalues varchar(255) NOT NULL DEFAULT 'Paperback,Hardbound,Kindle,Audiobook,Other',
+				genrevalues varchar(255) NOT NULL DEFAULT 'Fiction,Non-Fiction',
+				subgenrevalues varchar(255) NOT NULL DEFAULT 'Fiction,Non-Fiction',
 				freg varchar(255),
-				searchmode varchar(255) NOT NULL DEFAULT 'inclusive',
 				PRIMARY KEY  (ID),
 				KEY perpage (perpage)
 			) $charset_collate; ";
@@ -519,7 +523,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			if ( $test_name !== $wpdb->get_var( "SHOW TABLES LIKE '$test_name'" ) ) {
 				dbDelta( $sql_create_table1 );
 				$table_name = $wpdb->prefix . 'wpbooklist_search_settings';
-				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20, 'searchmode' => 'inclusive', ) );
+				$wpdb->insert( $table_name, array( 'ID' => 1, 'perpage' => 20 ) );
 			}
 		}
 

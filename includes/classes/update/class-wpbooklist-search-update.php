@@ -48,7 +48,7 @@ if ( ! class_exists( 'WPBookList_Search_Update', false ) ) :
 
 				// Get license key from plugin options, if it's already been saved. If it has, don't display anything.
 				$extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
-				$extension_settings = explode( '---', $extension_settings->repw);
+				$extension_settings = explode( '---', $extension_settings->freg);
 
 				// Retrieve our license key from the DB.
 				$license_key = $extension_settings[0];

@@ -31,6 +31,11 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		public $offset_term           = 0;
 		public $perpage               = 20;
 		public $total_search_results  = 0;
+		public $sortby                = 'title';
+		public $formatvalues          = '';
+		public $genrevalues           = '';
+		public $subgenrevalues        = '';
+
 
 
 		/**
@@ -47,6 +52,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 			$this->action = $action;
 
+			$this->get_search_options();
 			$this->get_url_params();
 			$this->build_db_query();
 			$this->output_top_container();
@@ -63,6 +69,22 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$this->output_search_results_close();
 			$this->output_ending_container();
 			$this->stitch_together_output();
+		}
+
+
+		/**
+		 * Gets the Saved Search Options.
+		 */
+		public function get_search_options() {
+
+			// Build the drop-down values.
+			global $wpdb;
+			$options              = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
+			$this->perpage        = $options->perpage;
+			$this->formatvalues   = $options->formatvalues;
+			$this->genrevalues    = $options->genrevalues;
+			$this->subgenrevalues = $options->subgenrevalues;
+
 		}
 
 		/**
@@ -102,6 +124,10 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			if ( isset( $_GET['offset'] ) ) {
 				$this->offset_term = filter_var( wp_unslash( $_GET['offset'] ), FILTER_SANITIZE_STRING );
 			}
+
+			if ( isset( $_GET['sortby'] ) ) {
+				$this->sortby = filter_var( wp_unslash( $_GET['sortby'] ), FILTER_SANITIZE_STRING );
+			}
 		}
 
 		/**
@@ -117,7 +143,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				error_log(print_r($existing_columns,true));
 				*/
 
-				$this->finalquery = "(SELECT title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, '" . $wpdb->prefix . "wpbooklist_jre_saved_book_log' as source FROM " . $wpdb->prefix . 'wpbooklist_jre_saved_book_log WHERE ';
+				$this->finalquery = "(SELECT title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, rating, '" . $wpdb->prefix . "wpbooklist_jre_saved_book_log' as source FROM " . $wpdb->prefix . 'wpbooklist_jre_saved_book_log WHERE ';
 
 				$beforepubdate  = false;
 				$afterpubdate   = false;
@@ -318,7 +344,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$dyna_query = '';
 				foreach ( $db_row as $table ) {
 					$dyna_query = $dyna_query . str_replace( 'saved_book_log', $table->user_table_name, $this->finalquery ) . ' UNION ALL ';
-					$count_query = $count_query . str_replace( "title, image, author, author2, author3, ID, pub_year, '".$wpdb->prefix."wpbooklist_jre_".$table->user_table_name."' as source", '* ', str_replace('(','',$dyna_query) );
+					$count_query = $count_query . str_replace( "title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, rating, '".$wpdb->prefix."wpbooklist_jre_".$table->user_table_name."' as source", '* ', str_replace('(','',$dyna_query) );
 					$count_query = str_replace( ")", '', $count_query );
 					$count_query = $count_query . 'UNION ALL';
 				}
@@ -333,7 +359,24 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 					$dyna_query = $this->finalquery;
 				}
 
-				$this->finalquery = $dyna_query . 'ORDER BY title LIMIT ' . $this->perpage . ' OFFSET ' . $this->offset_term;
+				// Now we'll do the Sort by stuff.
+				if ( 'title' !== $this->sortby ) {
+
+					if ( 'pubyearold' === $this->sortby ) {
+						$this->sortby = 'pub_year ASC';
+					}
+
+					if ( 'pubyearnew' === $this->sortby ) {
+						$this->sortby = 'pub_year DESC';
+					}
+
+					if ( 'ratinghigh' === $this->sortby ) {
+						$this->sortby = 'rating DESC';
+					}
+
+				}
+
+				$this->finalquery = $dyna_query . 'ORDER BY ' . $this->sortby . ' LIMIT ' . $this->perpage . ' OFFSET ' . $this->offset_term;
 
 				$count_query = str_replace( ' group by title)', ')', $count_query );
 				$count_query = rtrim($count_query, 'UNION ALL)');
@@ -350,8 +393,17 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		 */
 		public function output_top_container() {
 
+			$styling          = '';
+			$show_search_html = '';
+			if ( 0 < $this->total_search_results ) {
+				$styling = 'style="opacity:0; height:0px; overflow:hidden;"';
+				$show_search_html = '<button id="wpbooklist-search-show-form-button" type="button">Show Search Form</button>';
+			}
+
+
+
 			$this->top_container_output = '
-				<div id="wpbooklist_search_top_container"><form id="wpbooklist-search-searchterm-form">';
+				<div id="wpbooklist_search_top_container"><form id="wpbooklist-search-searchterm-form">' . $show_search_html . '<div ' . $styling . ' id="wpbooklist-search-controls-wrapper">';
 
 		}
 
@@ -469,33 +521,70 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		 */
 		public function output_right_fields() {
 
+			// Build the drop-down values.
+			$format_options   = '<option value="default" selected default>Select a Format...</option>';
+			$genre_options    = '<option value="default" selected default>Select a Genre...</option>';
+			$subgenre_options = '<option value="default" selected default>Select a Sub-Genre...</option>';
+
+			if ( '' !== $this->formatvalues && false !== stripos( $this->formatvalues, ',' ) ) {
+				$temp = explode( ',', $this->formatvalues );
+
+				foreach ( $temp as $key => $value ) {
+					if ( '' !== $value ) {
+						$format_options = $format_options . '<option value="' . $value . '">' . $value . '</option>';
+					}
+				}
+			}
+
+			if ( '' !== $this->genrevalues && false !== stripos( $this->genrevalues, ',' ) ) {
+				$temp = explode( ',', $this->genrevalues );
+
+				foreach ( $temp as $key => $value ) {
+					if ( '' !== $value ) {
+						$genre_options = $genre_options . '<option value="' . $value . '">' . $value . '</option>';
+					}
+				}
+			}
+
+			if ( '' !== $this->subgenrevalues && false !== stripos( $this->subgenrevalues, ',' ) ) {
+				$temp = explode( ',', $this->subgenrevalues );
+
+				foreach ( $temp as $key => $value ) {
+					if ( '' !== $value ) {
+						$subgenre_options = $subgenre_options . '<option value="' . $value . '">' . $value . '</option>';
+					}
+				}
+			}
+
 			$this->right_fields_output = '
 				<div id="wpbooklist_search_right_fields_container">
 					<div class="wpbooklist-search-right-fields-row"> 
 						<label>Format</label>
 						<select id="wpbooklist-search-format" data-dbfieldname="format">
-							<option value="default" selected default>Select a Format...</option>
-							<option>Paperback</option>
-							<option>Hardbound</option>
-							<option>Kindle</option>
-							<option>Audiobook</option>
-							<option>Other</option>
+							' . $format_options . '
 						</select>
 					</div>
 					<div class="wpbooklist-search-right-fields-row"> 
 						<label>Genre</label>
 						<select id="wpbooklist-search-genres" data-dbfieldname="genres">
-							<option value="default" selected default>Select a Genre...</option>
-							<option>Fiction</option>
-							<option>Non-Fiction</option>
+							' . $genre_options . '
 						</select>
 					</div>
 					<div class="wpbooklist-search-right-fields-row"> 
 						<label>Sub-Genre</label>
 						<select id="wpbooklist-search-subgenre" data-dbfieldname="subgenre">
-							<option value="default" selected default>Select a Sub-Genre...</option>
-							<option>Fiction</option>
-							<option>Non-Fiction</option>
+							' . $subgenre_options . '
+						</select>
+					</div>
+					<div class="wpbooklist-search-right-fields-row"> 
+						<label>Sort By</label>
+						<select id="wpbooklist-search-sortby" data-dbfieldname="sortby">
+							<option value="default" selected default>Select a Sort By Option...</option>
+							<option value="title">Title</option>
+							<option value="author">Author</option>
+							<option value="pubyearnew">Publication Year (Descending)</option>
+							<option value="pubyearold">Publication Year (Ascending)</option>
+							<option value="ratinghigh">Highest Rated</option>
 						</select>
 					</div>
 					' . $this->customfieldsdropdown . '
@@ -541,9 +630,10 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		public function output_submit() {
 
 			$this->output_submit = '
-				<div id="wpbooklist-search-submit-search-div">
-					<button>Search</button>
-					<button type="button" id="wpbooklist-search-submit-search-div">Reset</button>
+					<div id="wpbooklist-search-submit-search-div">
+						<button>Search</button>
+						<button type="button" id="wpbooklist-search-submit-search-div">Reset</button>
+					</div>
 				</div>';
 
 		}
@@ -823,4 +913,3 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 	}
 endif;
-

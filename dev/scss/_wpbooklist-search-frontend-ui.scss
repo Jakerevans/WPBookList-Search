@@ -1,3 +1,4 @@
+
 #wpbooklist_search_right_fields_container{
 	width: 50%;
     display: inline-block;
@@ -144,4 +145,10 @@
 #wpbooklist_search_top_container .wpbooklist-pagination-left-div p, #wpbooklist_search_top_container .wpbooklist-pagination-right-div p{
     margin: 5px;
     margin-bottom: 8px;
+}
+
+#wpbooklist_search_top_container #wpbooklist-search-show-form-button{
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }

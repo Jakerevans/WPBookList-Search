@@ -26,8 +26,8 @@ if ( ! class_exists( 'WPBookList_Search', false ) ) :
 			require_once SEARCH_CLASS_DIR . 'class-search-form.php';
 
 			// Get Translations.
-			require_once SEARCH_CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-search-translations.php';
-			$this->trans = new WPBookList_Search_Translations();
+			require_once CLASS_TRANSLATIONS_DIR . 'class-wpbooklist-translations.php';
+			$this->trans = new WPBookList_Translations();
 			$this->trans->trans_strings();
 
 			// Instantiate the class.
@@ -43,7 +43,7 @@ if ( ! class_exists( 'WPBookList_Search', false ) ) :
 		 * Opens the admin container for the tab
 		 */
 		private function output_open_admin_container(){
-			$title = 'Search General Settings';
+			$title = 'Search Settings';
 			$icon_url = SEARCH_ROOT_IMG_URL.'book.svg';
 			echo $this->template->output_open_admin_container($title, $icon_url);
 		}

@@ -52,7 +52,7 @@ if ( ! class_exists( 'WPBookList_Search_Update_Actual', false ) ) :
 				// Make check for active and valid salts.
 				$this->extension_settings = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
-				if ( false === stripos( $this->extension_settings->repw, 'aod' ) ) {
+				if ( false === stripos( $this->extension_settings->freg, 'aod' ) ) {
 					error_log('no dice!');
 					return false;
 				}

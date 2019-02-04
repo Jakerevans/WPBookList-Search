@@ -38,7 +38,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			global $wpdb;
 
 			// Get the saved search options to populate the checkboxes.
-			$hidesearchin = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+			$hidesearchin = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
 			// Determining if the default library needs to be checked in any way.
 			$saved_checked_1 = '';
@@ -261,7 +261,7 @@ if ( ! class_exists( 'WPBookList_Search_Form', false ) ) :
 			ksort( $this->db_array );
 
 			// Get the saved search options to populate the checkboxes.
-			$hidesearchby = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_options' );
+			$hidesearchby = $wpdb->get_row( 'SELECT * FROM ' . $wpdb->prefix . 'wpbooklist_search_settings' );
 
 			$fields_string = '';
 			foreach ( $this->checkboxes_array as $key => $indiv_entry ) {
