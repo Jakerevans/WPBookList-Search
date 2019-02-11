@@ -510,6 +510,7 @@ if ( ! class_exists( 'Search_General_Functions', false ) ) :
 			(
 				ID bigint(190) auto_increment,
 				perpage bigint(255) NOT NULL DEFAULT 20,
+				earlypubdate bigint(255) NOT NULL DEFAULT 1800,
 				formatvalues varchar(255) NOT NULL DEFAULT 'Paperback,Hardbound,Kindle,Audiobook,Other',
 				genrevalues varchar(255) NOT NULL DEFAULT 'Fiction,Non-Fiction',
 				subgenrevalues varchar(255) NOT NULL DEFAULT 'Fiction,Non-Fiction',

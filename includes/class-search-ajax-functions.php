@@ -76,13 +76,18 @@ if ( ! class_exists( 'Search_Ajax_Functions', false ) ) :
 				$subgenre = filter_var( wp_unslash( $_POST['subgenre'] ), FILTER_SANITIZE_STRING );
 			}
 
+			if ( isset( $_POST['earlypubdate'] ) ) {
+				$earlypubdate = filter_var( wp_unslash( $_POST['earlypubdate'] ), FILTER_SANITIZE_STRING );
+			}
+
 			$data         = array(
 				'perpage'  => $perpage,
 				'formatvalues'   => $format,
 				'genrevalues'    => $genre,
 				'subgenrevalues' => $subgenre,
+				'earlypubdate'   => $earlypubdate
 			);
-			$format       = array( '%d', '%s', '%s', '%s', );
+			$format       = array( '%d', '%s', '%s', '%s', '%s', );
 			$where        = array( 'ID' => 1 );
 			$where_format = array( '%d' );
 			$save_result = $wpdb->update( $wpdb->prefix . 'wpbooklist_search_settings', $data, $where, $format, $where_format );

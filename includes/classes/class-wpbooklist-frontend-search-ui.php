@@ -84,6 +84,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$this->formatvalues   = $options->formatvalues;
 			$this->genrevalues    = $options->genrevalues;
 			$this->subgenrevalues = $options->subgenrevalues;
+			$this->earlypubdate   = $options->earlypubdate;
 
 		}
 
@@ -150,6 +151,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$exactlypubdate = false;
 				$greatreview    = false;
 				$lessreview     = false;
+				$lastclause     = null;
 
 				$likes = '';
 				if ( 1 <= count( $this->searchbyfieldsarray ) ) {
@@ -192,9 +194,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 									$lessreview = true;
 								}
 							}
-
-
-
 						}
 
 						$temp = array();
@@ -203,25 +202,60 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 							$temp = explode( '|', $value );
 							foreach ( $temp as $key2 => $value2 ) {
 
+								echo $value2;
+
 								$value2 = rtrim( $value2 );
 								$value2 = ltrim( $value2 );
 
 								if ( ( count( $temp ) - 1 ) !== $key2 ) {
 									$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value2 . "%' OR ";
+									$lastclause = ' OR ';
 								} else {
-									$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value2 . "%' AND ";
+
+									if ( 'keywords' === $this->searchbyfieldsarray[ $key ] ) {
+										$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value2 . "%' OR ";
+										$lastclause = ' OR ';
+									} else {
+										$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value2 . "%' OR ";
+										$lastclause = ' OR ';
+									}
 								}
 							}
 						} else {
+							if ( 'keywords' === $this->searchbyfieldsarray[ $key ] ) {
+								$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value . "%' OR ";
+								$lastclause = ' OR ';
+							} else {
+								$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value . "%' AND ";
+								$lastclause = ' AND ';
+							}
+						}
 
-							$likes = $likes . $this->searchbyfieldsarray[ $key ] . " LIKE '%" . $value . "%' AND ";
+						// Consideration for if the Keywords is in play.
+						if ( false !== stripos( $this->searchbyfieldsarray[ $key ], 'keywords' ) ) {
+
+							$temp_final_query_explode = explode( "rating, '", $this->finalquery );
+
+							if ( false !== stripos( $value, '|' ) ) {
+								$temp_explode = explode( '|', $value );
+
+								foreach ( $temp_explode as $key3 => $value3 ) {
+									$likes = $likes . "title LIKE '%" . $value3 . "%' OR originaltitle LIKE '%" . $value3 . "%' OR publisher LIKE '%" . $value3 . "%' OR author LIKE '%" . $value3 . "%' OR author2 LIKE '%" . $value3 . "%' OR author3 LIKE '%" . $value3 . "%' OR authorfirst LIKE '%" . $value3 . "%' OR authorfirst2 LIKE '%" . $value3 . "%' OR authorfirst3 LIKE '%" . $value3 . "%' OR authorlast LIKE '%" . $value3 . "%' OR authorlast2 LIKE '%" . $value3 . "%' OR authorlast3 LIKE '%" . $value3 . "%' OR series LIKE '%" . $value3 . "%' OR genres LIKE '%" . $value3 . "%' OR subgenre LIKE '%" . $value3 . "%' OR keywords LIKE '%" . $value3 . "%' OR shortdescription LIKE '%" . $value3 . "%' OR description LIKE '%" . $value3 . "%' " . $lastclause;
+								}
+							} else {
+								$likes = $likes . "title LIKE '%" . $value . "%' OR originaltitle LIKE '%" . $value . "%' OR publisher LIKE '%" . $value . "%' OR author LIKE '%" . $value . "%' OR author2 LIKE '%" . $value . "%' OR author3 LIKE '%" . $value . "%' OR authorfirst LIKE '%" . $value . "%' OR authorfirst2 LIKE '%" . $value . "%' OR authorfirst3 LIKE '%" . $value . "%' OR authorlast LIKE '%" . $value . "%' OR authorlast2 LIKE '%" . $value . "%' OR authorlast3 LIKE '%" . $value . "%' OR series LIKE '%" . $value . "%' OR genres LIKE '%" . $value . "%' OR subgenre LIKE '%" . $value . "%' OR keywords LIKE '%" . $value . "%' OR shortdescription LIKE '%" . $value . "%' OR description LIKE '%" . $value . "%' " . $lastclause;
+							}
+
+							$temp_final_query_explode[0] = "(SELECT title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, rating, originaltitle, publisher, author, author2, author3, authorfirst, authorfirst2, authorfirst3, series, genres, subgenre, keywords, shortdescription, description, '";
+							$this->finalquery = $temp_final_query_explode[0] . $temp_final_query_explode[1];
+
 
 						}
 					}
 				}
 
 				$likes_for_count  = rtrim( $likes, 'AND ' );
-				$likes_for_count  = $likes_for_count . 'UNION ALL ';
+				$likes_for_count  = $likes_for_count . ' UNION ALL ';
 				$this->finalquery = $this->finalquery . $likes;
 				$count_query      = '(SELECT * FROM '.$wpdb->prefix . 'wpbooklist_jre_saved_book_log WHERE ' . $likes_for_count;
 
@@ -232,6 +266,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						$pos = strpos( $this->finalquery, '<= ' );
 						$this->finalquery = substr_replace( $this->finalquery, ' <= ', ( $pos - 1 ), 4);
 						$this->finalquery = rtrim( $this->finalquery, "%' AND" );
+						$this->finalquery = rtrim( $this->finalquery, "%' OR" );
 
 					}
 
@@ -240,6 +275,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						$pos = strpos( $this->finalquery, '= ' );
 						$this->finalquery = substr_replace( $this->finalquery, ' = ', ( $pos - 1 ), 3);
 						$this->finalquery = rtrim( $this->finalquery, "%' AND" );
+						$this->finalquery = rtrim( $this->finalquery, "%' OR" );
 					}
 
 					if ( $afterpubdate ) {
@@ -247,6 +283,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						$pos = strpos( $this->finalquery, '>= ' );
 						$this->finalquery = substr_replace( $this->finalquery, ' >= ', ( $pos - 1 ), 4);
 						$this->finalquery = rtrim( $this->finalquery, "%' AND" );
+						$this->finalquery = rtrim( $this->finalquery, "%' OR" );
 					}
 
 					if ( $lessreview ) {
@@ -279,34 +316,35 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 					if ( $beforepubdate ) {
 						$count_query = str_replace( "pub_year LIKE '%", 'pub_year <= ', $count_query );
-						$pos = strpos( $count_query, '<= ' );
-						$count_query = substr_replace( $count_query, ' <= ', ( $pos - 1 ), 4);
-						$count_query =  str_replace( "%'UNION", ' UNION', $count_query);
-
+						$pos         = strpos( $count_query, '<= ' );
+						$count_query = substr_replace( $count_query, ' <= ', ( $pos - 1 ), 4 );
+						$count_query = str_replace( "%'UNION", ' UNION', $count_query );
 					}
 
 					if ( $exactlypubdate ) {
 						$count_query = str_replace( "pub_year LIKE '%", 'pub_year = ', $count_query );
-						$pos = strpos( $count_query, '= ' );
-						$count_query = substr_replace( $count_query, ' = ', ( $pos - 1 ), 3);
-						$count_query =  str_replace( "%'UNION", ' UNION', $count_query);
+						$pos         = strpos( $count_query, '= ' );
+						$count_query = substr_replace( $count_query, ' = ', ( $pos - 1 ), 3 );
+						$count_query = str_replace( "%'UNION", ' UNION', $count_query );
 					}
 
 					if ( $afterpubdate ) {
 						$count_query = str_replace( "pub_year LIKE '%", 'pub_year >= ', $count_query );
-						$pos = strpos( $count_query, '>= ' );
-						$count_query = substr_replace( $count_query, ' >= ', ( $pos - 1 ), 4);
-						$count_query =  str_replace( "%'UNION", ' UNION', $count_query);
+						$pos         = strpos( $count_query, '>= ' );
+						$count_query = substr_replace( $count_query, ' >= ', ( $pos - 1 ), 4 );
+						$count_query = str_replace( "%'UNION", ' UNION', $count_query );
+						$count_query = str_replace( "%' UNION", ' UNION', $count_query );
 					}
 
 					if ( $lessreview ) {
 						$count_query = str_replace( "rating LIKE '%", 'rating < ', $count_query );
-						$pos = strpos( $count_query, '< ' );
-						$count_query = substr_replace( $count_query, ' < ', ( $pos - 1 ), 2);
-						$count_query =  str_replace( "%'UNION", ' UNION', $count_query);
+						$pos         = strpos( $count_query, '< ' );
+						$count_query = substr_replace( $count_query, ' < ', ( $pos - 1 ), 2 );
+						$count_query = str_replace( "%'UNION", ' UNION', $count_query );
+						$count_query = str_replace( "%' UNION", ' UNION', $count_query );
 
 						$temp_array = explode( 'rating', $count_query );
-						$pos = strpos( $temp_array[1], "%'" );
+						$pos        = strpos( $temp_array[1], "%'" );
 						if ( false !== $pos ) {
 							$temp_array[1] = substr_replace( $temp_array[1], '', $pos, strlen( "%'" ) );
 						}
@@ -315,12 +353,13 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 
 					if ( $greatreview ) {
 						$count_query = str_replace( "rating LIKE '%", 'rating > ', $count_query );
-						$pos = strpos( $count_query, '> ' );
-						$count_query = substr_replace( $count_query, ' > ', ( $pos - 1 ), 2);
-						$count_query =  str_replace( "%'UNION", ' UNION', $count_query);
+						$pos         = strpos( $count_query, '> ' );
+						$count_query = substr_replace( $count_query, ' > ', ( $pos - 1 ), 2 );
+						$count_query = str_replace( "%'UNION", ' UNION', $count_query );
+						$count_query = str_replace( "%' UNION", ' UNION', $count_query );
 
 						$temp_array = explode( 'rating', $count_query );
-						$pos = strpos( $temp_array[1], "%'" );
+						$pos        = strpos( $temp_array[1], "%'" );
 						if ( false !== $pos ) {
 							$temp_array[1] = substr_replace( $temp_array[1], '', $pos, strlen( "%'" ) );
 						}
@@ -329,7 +368,9 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				}
 
 				$this->finalquery = rtrim( $this->finalquery, 'AND' );
+				$this->finalquery = rtrim( $this->finalquery, 'OR' );
 				$this->finalquery = rtrim( $this->finalquery, 'AND ' );
+				$this->finalquery = rtrim( $this->finalquery, 'OR ' );
 				$this->finalquery = $this->finalquery . ')';
 
 				if ( 0 < count( $this->final_search_result ) ) {
@@ -346,7 +387,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 					$dyna_query = $dyna_query . str_replace( 'saved_book_log', $table->user_table_name, $this->finalquery ) . ' UNION ALL ';
 					$count_query = $count_query . str_replace( "title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, rating, '".$wpdb->prefix."wpbooklist_jre_".$table->user_table_name."' as source", '* ', str_replace('(','',$dyna_query) );
 					$count_query = str_replace( ")", '', $count_query );
-					$count_query = $count_query . 'UNION ALL';
+					$count_query = $count_query . ' UNION ALL';	
 				}
 
 				$count_query = substr($count_query, 0, -10);
@@ -379,8 +420,16 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 				$this->finalquery = $dyna_query . 'ORDER BY ' . $this->sortby . ' LIMIT ' . $this->perpage . ' OFFSET ' . $this->offset_term;
 
 				$count_query = str_replace( ' group by title)', ')', $count_query );
-				$count_query = rtrim($count_query, 'UNION ALL)');
+				$count_query = str_replace( 'OR UNION ALL SELECT', 'UNION ALL SELECT', $count_query );
+				$count_query = rtrim( $count_query, ' UNION ALL)' );
 				$count_query = $count_query . ') as tem';
+
+				foreach ( $db_row as $table ) {
+					$count_query = str_replace( "SELECT title, image, author, author2, author3, ID, pub_year, page_yes, post_yes, rating, originaltitle, publisher, author, author2, author3, authorfirst, authorfirst2, authorfirst3, series, genres, subgenre, keywords, shortdescription, description, '" . $wpdb->prefix . "wpbooklist_jre_" . $table->user_table_name . "' as source FROM " . $wpdb->prefix . "wpbooklist_jre_" . $table->user_table_name, 'SELECT * FROM ' . $wpdb->prefix . "wpbooklist_jre_" . $table->user_table_name, $count_query );
+				}
+
+				$count_query;
+				//echo $this->finalquery;
 
 				$this->total_search_results = $wpdb->get_var( $count_query );
 				$this->final_search_result  = $wpdb->get_results( $this->finalquery );
@@ -415,7 +464,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$current_year            = date( 'Y' );
 			$this->options_year_html = '';
 
-			for ( $i = $current_year; $i > 1499; $i-- ) {
+			for ( $i = $current_year; $i >= $this->earlypubdate; $i-- ) {
 				$this->options_year_html = $this->options_year_html . '<option>' . $i . '</option>';
 			}
 		}
@@ -483,16 +532,16 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$this->text_fields_output = '
 				<div id="wpbooklist_search_left_textfields_container">
 					<div class="wpbooklist-search-left-textfields-row"> 
-						<label>Keywords</label>
-						<input id="wpbooklist-search-keywords" data-dbfieldname="keywords" type="text" />
-					</div>
-					<div class="wpbooklist-search-left-textfields-row"> 
 						<label>Title</label>
 						<input id="wpbooklist-search-title" data-dbfieldname="title" type="text" />
 					</div>
 					<div class="wpbooklist-search-left-textfields-row"> 
 						<label>Author</label>
 						<input id="wpbooklist-search-author" data-dbfieldname="author" type="text" />
+					</div>
+					<div class="wpbooklist-search-left-textfields-row"> 
+						<label>Keywords</label>
+						<input id="wpbooklist-search-keywords" data-dbfieldname="keywords" type="text" />
 					</div>
 					<div class="wpbooklist-search-left-textfields-row"> 
 						<label>ISBN(s)</label>
@@ -511,6 +560,17 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						<input id="wpbooklist-search-language" data-dbfieldname="language" type="text" />
 					</div>
 					' . $this->customfieldstext . '
+					<div class="wpbooklist-search-right-fields-row"> 
+						<label>Sort By</label>
+						<select id="wpbooklist-search-sortby" data-dbfieldname="sortby">
+							<option value="default" selected default>Select a Sort By Option...</option>
+							<option value="title">Title</option>
+							<option value="author">Author</option>
+							<option value="pubyearnew">Publication Year (Descending)</option>
+							<option value="pubyearold">Publication Year (Ascending)</option>
+							<option value="ratinghigh">Highest Rated</option>
+						</select>
+					</div>
 				</div>
 			';
 
@@ -574,17 +634,6 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 						<label>Sub-Genre</label>
 						<select id="wpbooklist-search-subgenre" data-dbfieldname="subgenre">
 							' . $subgenre_options . '
-						</select>
-					</div>
-					<div class="wpbooklist-search-right-fields-row"> 
-						<label>Sort By</label>
-						<select id="wpbooklist-search-sortby" data-dbfieldname="sortby">
-							<option value="default" selected default>Select a Sort By Option...</option>
-							<option value="title">Title</option>
-							<option value="author">Author</option>
-							<option value="pubyearnew">Publication Year (Descending)</option>
-							<option value="pubyearold">Publication Year (Ascending)</option>
-							<option value="ratinghigh">Highest Rated</option>
 						</select>
 					</div>
 					' . $this->customfieldsdropdown . '
