@@ -35,6 +35,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 		public $formatvalues          = '';
 		public $genrevalues           = '';
 		public $subgenrevalues        = '';
+		public $earlypubdate          = '';
 
 
 
@@ -84,6 +85,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$this->formatvalues   = $options->formatvalues;
 			$this->genrevalues    = $options->genrevalues;
 			$this->subgenrevalues = $options->subgenrevalues;
+			$this->earlypubdate   = $options->earlypubdate;
 
 		}
 
@@ -441,7 +443,7 @@ if ( ! class_exists( 'WPBookList_Frontend_Search_UI', false ) ) :
 			$current_year            = date( 'Y' );
 			$this->options_year_html = '';
 
-			for ( $i = $current_year; $i > 1499; $i-- ) {
+			for ( $i = $current_year; $i > $this->earlypubdate; $i-- ) {
 				$this->options_year_html = $this->options_year_html . '<option>' . $i . '</option>';
 			}
 		}
